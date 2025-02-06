@@ -1,8 +1,10 @@
-import express from 'express';
+import { Router } from 'express';
 
-const router = express.Router();
+const router = Router();
 
 router.get('/',(req,res)=>{
     res.send('Quetion Page')
 })
 
+
+export default router;
