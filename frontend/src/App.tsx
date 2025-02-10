@@ -1,6 +1,8 @@
 import axios from 'axios'
 import './App.css'
 import { useState } from 'react'
+import { Navbar } from './components/Appbar';
+
 
 function App() {
 
@@ -12,12 +14,10 @@ const handler = async ()=>{
 }
   return (
     <>
-      <div className='text-center text-3xl mt-10 '> welcome to learn with learning-platform.</div>
-      <button className='bg-blue-500 text-white px-4 py-2 rounded mt-5' onClick={handler}>Click me</button>
-      <button onClick={()=>{
+      <div>
+        <div className='border-1 h-18'><Navbar/></div>
         
-      }}></button>
-      <div>{ans}hahah</div>
+      </div>
     </>
   )
 }
