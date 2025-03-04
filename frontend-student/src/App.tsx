@@ -6,6 +6,7 @@ import UserNav from './components/UserNav'
 import { DashBoard } from './components/DashBoard'
 import { LiveClass } from './components/liveClass'
 import UserProfile from './components/profile/userProfile'
+import { SignupPage } from './components/SignupPage'
 
 
 
@@ -27,6 +28,7 @@ function App() {
             <Route path='/' element={<DashBoard/>} />
             <Route path='/live-class' element={<LiveClass/>}/>
             <Route path='/profile' element={<UserProfile/>} />
+            <Route path='/signup' element={<SignupPage/>}/>
         </Routes>
       </div>
     </>

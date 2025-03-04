@@ -1,0 +1,40 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+// Looking for ways to speed up your queries, or scale easily with your serverless or edge functions?
+// Try Prisma Accelerate: https://pris.ly/cli/accelerate-init
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = "postgresql://project101_owner:r1sIVkon7LuR@ep-flat-night-a1uz62bw-pooler.ap-southeast-1.aws.neon.tech/learning-platform?sslmode=require"
+}
+
+model Student{
+  id Int @id @default(autoincrement())
+  name String
+  email String @unique
+  password String
+}
+
+model Teacher{
+  id Int @id @default(autoincrement())
+  name String
+  email String @unique
+  password String
+}
+
+model matrial_schema{
+  id Int @id @default(autoincrement())
+  title String
+  description String
+}
+
+model live_stream{
+  id Int @id @default(autoincrement())
+  title String
+  link String
+}
