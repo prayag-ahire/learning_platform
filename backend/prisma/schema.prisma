@@ -10,7 +10,7 @@ generator client {
 
 datasource db {
   provider = "postgresql"
-  url      = "postgresql://project101_owner:r1sIVkon7LuR@ep-flat-night-a1uz62bw-pooler.ap-southeast-1.aws.neon.tech/learning-platform?sslmode=require"
+  url      = env("DATABASE_URL")
 }
 
 model Student{
@@ -18,6 +18,7 @@ model Student{
   name String
   email String @unique
   password String
+  teacher StudentTeacher[] 
 }
 
 model Teacher{
@@ -25,7 +26,18 @@ model Teacher{
   name String
   email String @unique
   password String
+  students StudentTeacher[] 
 }
+
+model StudentTeacher {
+  studentId Int
+  teacherId Int
+  student Student @relation(fields: [studentId],references: [id])
+  teacher Teacher @relation(fields: [teacherId],references: [id])
+  @@id([studentId,teacherId])
+}
+
+
 
 model matrial_schema{
   id Int @id @default(autoincrement())

@@ -41,25 +41,26 @@ const UserProfile = ()=>{
 
     }
 
-    return(<div>
-        <div>Profile Setting</div>
-        <div>
-            <Card>
+    return(<div className="flex flex-col pl-10 py-5">
+        <div className="text-2xl font-medium p-2">Profile Setting</div>
+        <div className="p-2 w-2xl h-60">
+            <Card >
                 <CardHeader>
                     <CardTitle>Profile information</CardTitle>
                     <CardDescription>Update your personal information.</CardDescription>
                 </CardHeader>
                 <CardContent>
-                    <Form {...form}>
+                    <Form {...form} >
                         <form onSubmit={form.handleSubmit(handler) }>
-                            <div>
+                            <div className="flex space-x-2 mb-4">
                                 <Avatar>
                                     <AvatarImage src=""></AvatarImage>
                                     <AvatarFallback>FL</AvatarFallback>
                                 </Avatar>
                                 <Button variant="outline">change photo</Button>
                             </div>
-                            <FormField control={form.control} name="name" render={({field})=>(
+                            <div className="mb-4 border-1 rounded-2xl p-2">
+                            <FormField  control={form.control} name="name" render={({field})=>(
                                      <FormItem>
                                      <FormLabel>Full name</FormLabel>
                                      <FormControl>
@@ -67,7 +68,8 @@ const UserProfile = ()=>{
                                      </FormControl>
                                  </FormItem>
                             )}  
-                            />
+                            /></div>
+                            <div className="mb-4 border-1 rounded-2xl p-2">
                             <FormField
                             control={form.control}
                             name="email"
@@ -80,7 +82,9 @@ const UserProfile = ()=>{
                                 </FormItem>
                             )} 
                             />
+                            </div>
 
+                            <div className="mb-4 border-1 rounded-2xl p-2">
                             <FormField
                             control={form.control}
                             name="studentId"
@@ -93,6 +97,7 @@ const UserProfile = ()=>{
                                 </FormItem>
                             )} 
                             />
+                            </div>
                             <Button type="submit">Update Profile</Button>
                         </form>
                     </Form>

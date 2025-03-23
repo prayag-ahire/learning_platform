@@ -29,7 +29,7 @@ const UserNav = ()=>{
                 </DropdownMenuLabel>
                 <DropdownMenuSeparator/>
                 <DropdownMenuItem asChild>
-                    <Link to="/signup">
+                    <Link to="/profile">
                         <User/>
                         <span>profile</span>
                     </Link>

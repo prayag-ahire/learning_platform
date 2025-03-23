@@ -7,6 +7,8 @@ import { DashBoard } from './components/DashBoard'
 import { LiveClass } from './components/liveClass'
 import UserProfile from './components/profile/userProfile'
 import { SignupPage } from './components/SignupPage'
+import Teacher from './components/Teacher'
+import { LoginPage } from './components/loginPage'
 
 
 
@@ -29,6 +31,8 @@ function App() {
             <Route path='/live-class' element={<LiveClass/>}/>
             <Route path='/profile' element={<UserProfile/>} />
             <Route path='/signup' element={<SignupPage/>}/>
+            <Route path='/teachers' element={<Teacher/>}/>
+            <Route path='/login' element={<LoginPage/>}/>
         </Routes>
       </div>
     </>

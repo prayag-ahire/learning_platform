@@ -13,6 +13,7 @@ export const Navbar = ()=>{
                     <Link to='/' className={cn("transition-colors hover:text-primary",pathname === "/"? "text-primary":"text-muted-foreground")}>Home</Link>
                     <Link to='/live-class' className={cn("transition-colors hover:text-primary",pathname === "/live-class"? "text-primary":"text-muted-foreground")}>Live Class</Link>
                     <Link to='/materials' className={cn("transition-colors hover:text-primary",pathname === "/materials"? "text-primary":"text-muted-foreground")}>Materials</Link>
+                    <Link to='/teachers' className={cn("transition-colors hover:text-primary",pathname === "/teachers"? "text-primary":"text-muted-foreground")}>teacher</Link>
                 </nav>
             </div>
         </div>

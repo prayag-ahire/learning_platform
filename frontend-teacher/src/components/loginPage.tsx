@@ -6,7 +6,7 @@ import * as z from "zod"
 import { useForm } from "react-hook-form";
 import axios from "axios";
 import { Input } from "./ui/input";
-import Cookies from "js-cookie";
+// import Cookies from "js-cookie";
 
 
 const  loginFormSchema = z.object({
@@ -30,7 +30,7 @@ export const LoginPage = ()=>{
     async function handler(values:loginFormValues){
         console.log("login enter");
         console.log(values.email,values.password);
-        const response = await axios.post("http://localhost:3000/api/v1/student/login",{
+        const response = await axios.post("http://localhost:3000/api/v1/teacher/login",{
             email: values.email,
             password:values.password
 

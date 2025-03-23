@@ -5,7 +5,7 @@ import { Form, FormControl, FormField, FormItem, FormLabel } from "./ui/form"
 import * as z from "zod"
 import { useForm } from "react-hook-form";
 import axios from "axios";
-import Cookies from "js-cookie";
+// import Cookies from "js-cookie";
 import { Input } from "./ui/input";
 
 
@@ -43,7 +43,7 @@ export const SignupPage = ()=>{
 
     async function handler(values:loginFormValues){
         console.log(values.name);
-        const response = await axios.post("http://localhost:3000/api/v1/student/signup",{
+        const response = await axios.post("http://localhost:3000/api/v1/teacher/signup",{
             name: values.name,
             email: values.email,
             password: values.password

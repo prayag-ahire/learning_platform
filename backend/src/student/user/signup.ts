@@ -4,16 +4,18 @@ import bcrypt from "bcryptjs"
 import jwt from "jsonwebtoken"
 
 
+
 const router = Router();
 const prisma = new PrismaClient();
 
- router.post('/ssignup',async (req,res):Promise<any> =>{
+ router.post('/signup',async (req,res):Promise<any> =>{
 
-    const {name,email,password,confirmpassword} = req.body
+    const {name,email,password} = req.body
 
     const salt = await bcrypt.genSalt(10);
     const hash = await bcrypt.hash(password,salt);
     let student;
+
     try{
         const user = await prisma.student.findUnique({
             where:{
@@ -31,15 +33,16 @@ const prisma = new PrismaClient();
                 password : hash
             },
             select:{
-                email
+                email:true
             }
         })
         }
-        jwt.sign({email},"Secrate",{
-            expiresIn: '1d'
+        jwt.sign({email},"this",{
+            expiresIn: '7d'
         },(err,token)=>{
             if(err) throw err;
             res.json({token});
+            console.log(token);
         });
 
        
