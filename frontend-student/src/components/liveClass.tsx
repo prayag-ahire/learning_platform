@@ -1,4 +1,5 @@
 import * as mediasoup from "mediasoup-client"
+import { useEffect } from "react";
 let device: mediasoup.types.Device;
 let socket: WebSocket;
 let remote_video: HTMLVideoElement | null;
@@ -7,6 +8,11 @@ let remoteStream: MediaStream;
 
 const LiveClass = ()=>{
 
+    useEffect(()=>{
+      setTimeout(() => {
+        reciverHandler();
+      }, 3000);
+    },[])
     socket = new WebSocket("ws://localhost:3000/ws");
 
     socket.onopen = () => {
@@ -177,9 +183,9 @@ const LiveClass = ()=>{
 
         </div>
         <div><p id='text_p'></p></div>
-        <div>
+        {/* <div>
             <button className="bg-red-500 text-white p-1 rounded-sm"  id="btn_sub" onClick={reciverHandler}>connect</button>
-        </div>
+        </div> */}
       </div>)
     
 }

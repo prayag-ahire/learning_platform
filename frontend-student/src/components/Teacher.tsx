@@ -28,22 +28,33 @@ const Teacher = ()=>{
         <div>
             <h1 className="text-2xl font-medium ">Subscribed Teachers</h1>
             <div>
-                // render subscribed teachers
+            <div  className="flex justify-around p-2 w-1/4 mx-5 my-5 border-2 border-black rounded-2xl ">
+                <div className="grid ">
+                  <Avatar className="size-12">
+                    <AvatarImage src={  "https://cdn.pixabay.com/photo/2020/07/01/12/58/icon-5359554_1280.png"} />
+                  </Avatar>
+                  <p className="text-2xl font-medium">name</p>
+                </div>
+                <div className="flex  items-center ">
+                    <Button className="bg-black" onSubmit={()=>{}}>Chat</Button>
+                </div>
+              </div>
             </div>
         </div>
         <div>
             <h1 className=" text-2xl font-medium ">More Teachers</h1>
             <div className="flex flex-wrap justify-around ">
                {teachers.map((teacher)=>(
-                <div key={teacher.id} className="w-1/4 mx-5 my-5 border-2 border-black rounded-2xl ">
-                <div className="flex justify-around">
+                <div key={teacher.id} className="flex justify-around p-2 w-1/4 mx-5 my-5 border-2 border-black rounded-2xl ">
+                <div className="grid ">
                   <Avatar className="size-12">
                     <AvatarImage src={teacher.avatar || "https://cdn.pixabay.com/photo/2020/07/01/12/58/icon-5359554_1280.png"} />
                   </Avatar>
                   <p className="text-2xl font-medium">{teacher.name}</p>
                 </div>
-                <div className="flex items-center justify-center">
-                  <Button onSubmit={()=>{handler(teacher.name)}}>subscribe</Button>
+                <div className="flex flex-col items-center space-y-2">
+                    <Button className="bg-gradient-to-r from-violet-600 to-indigo-600" onSubmit={()=>{handler(teacher.name)}}>subscribe</Button>
+                    <Button>More info</Button>
                 </div>
               </div>
                ))} 

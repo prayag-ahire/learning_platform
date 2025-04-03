@@ -9,6 +9,7 @@ import UserProfile from './components/profile/userProfile'
 import { SignupPage } from './components/SignupPage'
 import Teacher from './components/Teacher'
 import { LoginPage } from './components/loginPage'
+import { LiveClass2 } from './components/liveClass2'
 
 
 
@@ -28,11 +29,12 @@ function App() {
         </header>
         <Routes>
             <Route path='/' element={<DashBoard/>} />
-            <Route path='/live-class' element={<LiveClass/>}/>
+            <Route path='/startlive' element={<LiveClass/>}/>
             <Route path='/profile' element={<UserProfile/>} />
             <Route path='/signup' element={<SignupPage/>}/>
             <Route path='/teachers' element={<Teacher/>}/>
             <Route path='/login' element={<LoginPage/>}/>
+            <Route path='live-class' element={<LiveClass2/>}/>
         </Routes>
       </div>
     </>

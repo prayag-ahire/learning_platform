@@ -4,20 +4,22 @@ import { cn } from "../lib/utils";
 const NavBar = ()=>{
 
     const {pathname} = useLocation();
-    return(<div className="flex flex-row items-baseline justify-between space-x-6 ">
-            <p className="items-center text-4xl font-bold text-emerald-500 ml-4">Weteach</p>
-            <nav className="flex items-center space-x-6 ">
-                <Link to="/" className={cn("transition-colors hover:text-primary", pathname === '/' ? "text-primary":"text-muted-foreground")}>
-                <p>Home</p>
-                </Link>
-                <Link to="/liveclass" className={cn("transition-colors hover:text-primary", pathname === '/liveclass' ? "text-primary":"text-muted-foreground")}>
-                <p>liveclass</p>
-                </Link>
-                <Link to="/matrial" className={cn("transition-colors hover:text-primary", pathname === '/matrial' ? "text-primary":"text-muted-foreground")}>
-                <p>matrial</p>
-                </Link>
-            </nav>
-    </div>)
+    return(
+        <div className="flex flex-row justify-between  mx-4">
+            <div className="flex items-baseline gap-8 justify-between">
+                <p className="text-4xl font-bold text-emerald-500 ml-4">WeTeach</p>
+                <nav className="flex items-center space-x-6 text-lg font-medium">
+                    <Link to='/' className={cn("transition-colors hover:text-primary",pathname === "/"? "text-primary":"text-muted-foreground")}>Home</Link>
+                    <Link to='/live-class' className={cn("transition-colors hover:text-primary",pathname === "/live-class"? "text-primary":"text-muted-foreground")}>Live Class</Link>
+                    <Link to='/materials' className={cn("transition-colors hover:text-primary",pathname === "/materials"? "text-primary":"text-muted-foreground")}>Materials</Link>
+                    <Link to='/students' className={cn("transition-colors hover:text-primary",pathname === "/students"? "text-primary":"text-muted-foreground")}>students</Link>
+                </nav>
+            </div>
+        </div>
+    )
 }
+
+
+
 
 export default NavBar;

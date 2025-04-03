@@ -5,7 +5,7 @@ import { Form, FormControl, FormField, FormItem, FormLabel } from "./ui/form"
 import * as z from "zod"
 import { useForm } from "react-hook-form";
 import axios from "axios";
-import Cookies from "js-cookie";
+// import Cookies from "js-cookie";
 import { Input } from "./ui/input";
 
 
@@ -34,7 +34,7 @@ export const SignupPage = ()=>{
      const form = useForm<loginFormValues>({
             resolver:zodResolver(loginFormSchema),
             defaultValues:{
-                name:"",
+                name:"prayag",
                 email:"",
                 password:"",
                 confirmPassword:""
