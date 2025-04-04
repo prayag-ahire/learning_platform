@@ -7,6 +7,7 @@ import { useForm } from "react-hook-form";
 import axios from "axios";
 // import Cookies from "js-cookie";
 import { Input } from "./ui/input";
+import { Link } from "react-router-dom";
 
 
 const  loginFormSchema = z.object({
@@ -126,6 +127,7 @@ export const SignupPage = ()=>{
                                 />
                                 </div>
                                 <Button type="submit">Sign Up</Button>
+                                <p>Already have an account <Link to="/login" className="underline">Login</Link></p>
                         </form>
                     </Form>
                 </CardContent>

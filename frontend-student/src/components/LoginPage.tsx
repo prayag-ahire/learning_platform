@@ -7,6 +7,8 @@ import { useForm } from "react-hook-form";
 import axios from "axios";
 import { Input } from "./ui/input";
 import Cookies from "js-cookie";
+import { Link } from "react-router-dom";
+import { useEffect } from "react";
 
 
 const  loginFormSchema = z.object({
@@ -19,6 +21,10 @@ type loginFormValues = z.infer<typeof loginFormSchema>
 
 export const LoginPage = ()=>{
 
+    useEffect(()=>{
+        console.log(localStorage.getItem("token"));
+        console.log("this is login page")
+    },[])
      const form = useForm<loginFormValues>({
             resolver:zodResolver(loginFormSchema),
             defaultValues:{
@@ -82,6 +88,7 @@ export const LoginPage = ()=>{
                                 </div>
                                
                                 <Button type="submit">Login</Button>
+                                <p >Register as new user <Link to="/signup" className="underline">Signup</Link></p>
                         </form>
                     </Form>
                 </CardContent>

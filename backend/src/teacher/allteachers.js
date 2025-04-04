@@ -10,7 +10,8 @@ router.get("/allteacher", async (req, res) => {
     try {
         const teachers = await prisma.teacher.findMany({
             select:{
-                name:true
+                name:true,
+                id:true
             }
         });
         res.status(200).json({ teachers });

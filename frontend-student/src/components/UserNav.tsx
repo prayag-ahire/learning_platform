@@ -3,13 +3,17 @@ import { Button } from "./ui/button";
 import { Avatar, AvatarFallback, AvatarImage } from "./ui/avatar";
 import { DropdownMenuContent } from "./ui/dropdown-menu";
 import { useState } from "react";
-import { Link } from "react-router-dom";
-import { User } from "lucide-react";
+import { Link, useNavigate } from "react-router-dom";
+import { LogOut, User } from "lucide-react";
 
 const UserNav = ()=>{
     const [userName] = useState("Flash");
     const [userEmail] = useState("flash@gmail.com");
-
+    const Navigate = useNavigate();
+    const handler = ()=>{
+        localStorage.removeItem("token");
+        Navigate("/login");
+    }
     return(<div>
         <DropdownMenu>
             <DropdownMenuTrigger asChild>
@@ -33,6 +37,12 @@ const UserNav = ()=>{
                         <User/>
                         <span>profile</span>
                     </Link>
+                </DropdownMenuItem>
+                <DropdownMenuItem asChild>
+                        <div onClick={handler}>
+                            <LogOut/>
+                            <span>Logout</span>
+                        </div>
                 </DropdownMenuItem>
             </DropdownMenuContent>
         </DropdownMenu>

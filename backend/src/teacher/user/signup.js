@@ -14,7 +14,6 @@ const prisma = new PrismaClient();
 
     const salt = await bcrypt.genSalt(10);
     const hash = await bcrypt.hash(password,salt);
-    let teacher;
 
     try{
         const user = await prisma.teacher.findUnique({
@@ -26,24 +25,24 @@ const prisma = new PrismaClient();
             return res.status(400).json({email:"is already exist"})
         }
         else{
-        teacher =  await prisma.teacher.create({
+        const teacher =  await prisma.teacher.create({
             data:{
                 name,
                 email,
                 password : hash
             },
             select:{
-                email:true
+                email:true,
+                id:true
             }
         })
-        }
-        jwt.sign({email},"this",{
-            expiresIn: '7d'
-        },(err,token)=>{
+        const id = teacher.id;
+        jwt.sign({id},"this",{ expiresIn: '7d' },(err,token)=>{
             if(err) throw err;
             res.json({token});
             console.log(token);
         });
+    }
 
 
 

@@ -10,6 +10,8 @@ import { SignupPage } from './components/SignupPage'
 import Teacher from './components/Teacher'
 import { LoginPage } from './components/loginPage'
 import { LiveClass2 } from './components/liveClass2'
+import { ProtectedRoute } from './components/protectedRoute'
+import { Material } from './components/Material'
 
 
 
@@ -27,15 +29,18 @@ function App() {
           </div>
         </div>
         </header>
-        <Routes>
+          <ProtectedRoute>
+            <Routes>
             <Route path='/' element={<DashBoard/>} />
             <Route path='/startlive' element={<LiveClass/>}/>
             <Route path='/profile' element={<UserProfile/>} />
             <Route path='/signup' element={<SignupPage/>}/>
             <Route path='/teachers' element={<Teacher/>}/>
             <Route path='/login' element={<LoginPage/>}/>
-            <Route path='live-class' element={<LiveClass2/>}/>
-        </Routes>
+            <Route path='/live-class' element={<LiveClass2/>}/>
+            <Route path='/materials' element={<Material/>}/>
+            </Routes>
+            </ProtectedRoute>
       </div>
     </>
   )

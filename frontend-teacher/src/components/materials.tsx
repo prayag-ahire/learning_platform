@@ -1,9 +1,14 @@
 export const Materials = ()=>{
+
+    const fileHandler = ()=>{
+        document.getElementById("myfile")?.click()
+    }
     
     return(<div className="w-full h-full scroll-auto">
             <div className=" grid   border-black m-2 ">
                 <div className="font-bold p-2 text-2xl"><p>Upload New Matrial</p></div>
-                <div className=" rounded-2xl m-2 bg-amber-400 h-90 flex flex-col items-center justify-center ">
+                <input type="file" hidden id="myfile"></input>
+                <div className=" rounded-2xl m-2 bg-amber-400 h-90  flex flex-col items-center justify-center " onClick={fileHandler}>
                          <div className="flex space-x-2  bg-white text-black   font-bold p-3  rounded-sm">
                              <div>
                                  <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="size-6">
@@ -14,6 +19,7 @@ export const Materials = ()=>{
                              </div>
                              <p className="text-white pt-2">or drop files here</p>
                 </div>
+                
             <div>
             
                 </div>

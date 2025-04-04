@@ -16,8 +16,8 @@ function App() {
   return (
     <>
       <div className='flex flex-col min-h-screen'>
-        <header className='border-b'>
-          <div className='flex h-16 items-center justify-between'>
+        <header>
+          <div className='flex h-16 items-center my-3 justify-between'>
             <NavBar/>
             <div className='flex mx-4 '>
               <UserNav/>
