@@ -5,7 +5,7 @@ import { Form, FormControl, FormField, FormItem, FormLabel } from "./ui/form"
 import * as z from "zod"
 import { useForm } from "react-hook-form";
 import axios from "axios";
-// import Cookies from "js-cookie";
+import {ToastContainer,toast} from "react-toastify"
 import { Input } from "./ui/input";
 import { Link } from "react-router-dom";
 
@@ -52,7 +52,7 @@ export const SignupPage = ()=>{
         const token = await response.data;
 
         // localStorage.getItem("token",token);
-        alert("Signup successful")
+        toast("Signup successful")
         console.log(token);
     }
 
@@ -60,6 +60,7 @@ export const SignupPage = ()=>{
 
     return(<div>
         <div className="p-4 w-2xl" id='page'>
+            <ToastContainer/>
             <Card>
                 <CardHeader>
                     <CardTitle className="text-2xl"> SignUp </CardTitle>

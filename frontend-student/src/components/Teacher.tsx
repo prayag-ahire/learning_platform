@@ -12,7 +12,6 @@ const Teacher = ()=>{
 
     useEffect(()=>{
         try{
-            console.log("hello");
             const fetchteacher = async()=>{
                 const response = await axios.get("http://localhost:3000/api/v1/teacher/allteacher");
                 setteachers(response.data.teachers);

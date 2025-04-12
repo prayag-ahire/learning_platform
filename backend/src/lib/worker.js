@@ -1,13 +1,7 @@
 import * as mediasoup from "mediasoup";
 import {config} from "../config.js";
 
-    
-const {
-    worker,
-    router
-} = [];
-
-let nextMediasoupWorkerIdx = 0;
+ 
 
 const createWorker = async () => {
     const worker = await mediasoup.createWorker({

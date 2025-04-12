@@ -7,16 +7,39 @@ let device: mediasoup.Device;
 let socket: WebSocket;
 let producer: mediasoup.types.Producer;
 let transport: mediasoup.types.Transport;
+let stream:MediaStream | undefined;
+let videoElemnt:HTMLVideoElement
 
 const LiveClass = ()=>{
-  const [videos,setVideo] = useState(true);
-  const [audios,setAudio] = useState(true);
+  const [videos,setVideo] = useState<[MediaStreamTrack,boolean]>();
+  const [audios,setAudio] = useState<[MediaStreamTrack,boolean]>();
+
+  const [localMedia,setLocalMedia] = useState(true);
+
   const Navigate = useNavigate();
+
+  
     useEffect(()=>{
       setTimeout(()=>{
         publishHandler();
       },5000)
     },[])
+
+    const endhandler = ()=>{
+      stream?.getVideoTracks().forEach((track) => {
+        track.stop();
+      });    
+
+      transport.close();
+      producer.close();
+
+      const msg = JSON.stringify({
+        type:"broadcaster-closed",
+        producerId:producer.id
+      }); 
+      socket.send(msg);
+      Navigate("/")
+    }
 
     socket = new WebSocket("ws://localhost:3000/ws");
 
@@ -31,7 +54,6 @@ const LiveClass = ()=>{
     }
     
     socket.onmessage = (event)=>{
-      
       const res = JSON.parse(event.data);
 
         switch (res.type) {
@@ -41,11 +63,14 @@ const LiveClass = ()=>{
     
             case 'ProducerTransportCreated':
               onProducerTransportCreated(res);
+              socket.send(JSON.stringify({type:"try1"}));
               break;
             
             case 'resumed':
               console.log(event.data);
               break;
+
+            
             default:
               break;
           }
@@ -82,7 +107,50 @@ const LiveClass = ()=>{
       }
     };
 
+    const changeStream = (stream:MediaStream)=>{
+      const videotrack = stream.getVideoTracks()[0];
+      const audiotrack = stream.getAudioTracks()[0];
 
+      producer.replaceTrack({track:videotrack});
+      producer.replaceTrack({track:audiotrack});
+      videoElemnt.srcObject = stream;
+      videoElemnt.play();
+
+      setVideo([videotrack,true]);
+      setAudio([audiotrack,true]);
+    }
+
+    const stopOldTrack = ()=>{
+      stream?.getTracks().forEach(track=>track.stop());
+    }
+
+    const mediahandler = async()=>{
+
+      stopOldTrack();
+
+      if(!localMedia){
+         stream = await navigator.mediaDevices.getDisplayMedia({audio:true,video:true});
+        changeStream(stream);
+      }else{
+        stream = await navigator.mediaDevices.getUserMedia({audio:true,video:true});
+        changeStream(stream);
+      }
+    }
+
+    const audiohandler = ()=>{
+      if(audios?.[1]){
+        audios[0].enabled = false;
+      }else if(audios?.[1] == false){
+        audios[0].enabled = true;
+      }
+
+    }
+
+    const videohandler = ()=>{
+      if(videos){
+        videos[0].enabled = false;
+      }
+    }
 
     const publishHandler = ()=>{
       console.log("Starting go Live ")
@@ -99,7 +167,7 @@ const LiveClass = ()=>{
     }
 
 
-    const onProducerTransportCreated = async (event:any) => { 
+    const onProducerTransportCreated = async (event:any):Promise<void> => { 
       if(event.error){
         console.error(event.error);
         return;
@@ -151,7 +219,7 @@ const LiveClass = ()=>{
             }
           });
         });
-    
+        
         transport.on('connectionstatechange', async (state) => {
             const statusText = document.getElementById('text_p');
 
@@ -178,17 +246,17 @@ const LiveClass = ()=>{
               break;
           }
         });
-        let stream:any;
+     
         try{
           stream = await getUserMedia();
           console.log("this is stream : ",stream);
-          const videoElemnt = document.getElementById('local_stream') as HTMLVideoElement;
-          videoElemnt.srcObject = stream;
+          videoElemnt = document.getElementById('local_stream') as HTMLVideoElement;
+          videoElemnt.srcObject = stream || null;
           videoElemnt.muted = true;
           videoElemnt.play();
           
           
-          const videoTrack = stream.getVideoTracks()[0];
+          const videoTrack = stream?.getVideoTracks()[0];
           producer = await transport.produce({ track: videoTrack });
           
         }catch(err){
@@ -226,27 +294,25 @@ const LiveClass = ()=>{
         <div className="absolute bottom-20 left-20 opacity-0 group-hover:opacity-60 transition-opacity duration-300">
                 <div className="w-full flex flex-col items-center ">
                 <div className="flex justify-around w-2xl h-10  text-white bg-black  border-2 rounded-2xl  items-center">
-                    <div>
+                    <div onClick={()=>{ setLocalMedia(x=>x==true?false:true); mediahandler()}}>
                         <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="size-6">
                         <path strokeLinecap="round" strokeLinejoin="round" d="M9 17.25v1.007a3 3 0 0 1-.879 2.122L7.5 21h9l-.621-.621A3 3 0 0 1 15 18.257V17.25m6-12V15a2.25 2.25 0 0 1-2.25 2.25H5.25A2.25 2.25 0 0 1 3 15V5.25m18 0A2.25 2.25 0 0 0 18.75 3H5.25A2.25 2.25 0 0 0 3 5.25m18 0V12a2.25 2.25 0 0 1-2.25 2.25H5.25A2.25 2.25 0 0 1 3 12V5.25" />
                         </svg>
                     </div>
-                    <div>
-                        {audios ? 
+                    <div onClick={audiohandler}>
                         <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="size-6">
                         <path strokeLinecap="round" strokeLinejoin="round" d="M12 18.75a6 6 0 0 0 6-6v-1.5m-6 7.5a6 6 0 0 1-6-6v-1.5m6 7.5v3.75m-3.75 0h7.5M12 15.75a3 3 0 0 1-3-3V4.5a3 3 0 1 1 6 0v8.25a3 3 0 0 1-3 3Z" />
-                        </svg> : <div></div>}
+                        </svg> : <div></div>
                     </div>
-                    <div>
-                       {videos ? <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="size-6">
+                    <div onClick={videohandler}>
+                        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="size-6">
                         <path strokeLinecap="round" strokeLinejoin="round" d="m15.75 10.5 4.72-4.72a.75.75 0 0 1 1.28.53v11.38a.75.75 0 0 1-1.28.53l-4.72-4.72M4.5 18.75h9a2.25 2.25 0 0 0 2.25-2.25v-9a2.25 2.25 0 0 0-2.25-2.25h-9A2.25 2.25 0 0 0 2.25 7.5v9a2.25 2.25 0 0 0 2.25 2.25Z" />
-                        </svg>:<div></div>}
+                        </svg>:<div></div>
                     </div> 
-                    <div onClick={()=>{ socket.close(); Navigate("/")}}>
+                    <div onClick={endhandler}>
                         <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="size-6">
                         <path strokeLinecap="round" strokeLinejoin="round" d="M8.25 9V5.25A2.25 2.25 0 0 1 10.5 3h6a2.25 2.25 0 0 1 2.25 2.25v13.5A2.25 2.25 0 0 1 16.5 21h-6a2.25 2.25 0 0 1-2.25-2.25V15m-3 0-3-3m0 0 3-3m-3 3H15" />
                         </svg>
-
                     </div>
                 </div>
                 </div>

@@ -29,6 +29,7 @@ const LiveClass = ()=>{
 
         const res = JSON.parse(event.data);
 
+        console.log(res);
         switch (res.type) {
             case 'routerCapabilities':
                 onRouterRtpCapabilities(res);
@@ -43,7 +44,12 @@ const LiveClass = ()=>{
 
             case 'subscribed':
               onSubscribe(event);
-                break;
+              break;
+              
+            case 'closed':
+                console.log("hello");
+                onBroadcasterclosed()
+              break;
 
             default:
               break;
@@ -65,7 +71,7 @@ const LiveClass = ()=>{
     
     
     const onRouterRtpCapabilities = (res:any) => {
-        console.log("socket id :",res.id);
+        // console.log("socket id :",res.id);
         
         loadDevice(res.data);
     };
@@ -82,6 +88,13 @@ const LiveClass = ()=>{
       socket.send(message);
     } 
 
+    const onBroadcasterclosed = ()=>{
+      console.log("producer close call");
+      // remoteStream.removeTrack
+      // transport.close();
+      
+    }
+
     
     const onsubTransportCreated =async (event:any)=>{
       if(event.error){
@@ -91,20 +104,20 @@ const LiveClass = ()=>{
     console.log("params : ",event.data);
 
     transport.on('connect',({dtlsParameters},callback,errback)=>{
-      console.log("connected to server")
-      console.log(" get dtlsParamters : ",dtlsParameters);
+      // console.log("connected to server")
+      // console.log(" get dtlsParamters : ",dtlsParameters);
         const msg={
             type:"connectConsumerTransport",
             transportId:transport.id,
             dtlsParameters
         }
-        console.log("message : ",msg);
+        // console.log("message : ",msg);
         const message = JSON.stringify(msg);
         socket.send(message);
         socket.addEventListener('message',(event)=>{
             let res = JSON.parse(event.data);
             if(res.type == "subConnected"){
-              console.log("consumer transport connected!!!")
+              // console.log("consumer transport connected!!!")
               callback();
             }
         });

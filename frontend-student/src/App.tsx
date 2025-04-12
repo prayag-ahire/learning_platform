@@ -12,6 +12,7 @@ import { LoginPage } from './components/loginPage'
 import { LiveClass2 } from './components/liveClass2'
 import { ProtectedRoute } from './components/protectedRoute'
 import { Material } from './components/Material'
+import Chat  from './components/chat'
 
 
 
@@ -39,6 +40,7 @@ function App() {
             <Route path='/login' element={<LoginPage/>}/>
             <Route path='/live-class' element={<LiveClass2/>}/>
             <Route path='/materials' element={<Material/>}/>
+            <Route path='/chat' element={<Chat/>}/>
             </Routes>
             </ProtectedRoute>
       </div>

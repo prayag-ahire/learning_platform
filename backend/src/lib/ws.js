@@ -54,6 +54,9 @@ const webSocketConnection = async (websocket)=>{
                 case 'consume':
                     onConsume(event,ws);
                     break;
+                case 'broadcaster-closed':
+                    onclose(ws);
+                    break;
                 default:
                   break;
             }
@@ -81,6 +84,12 @@ const webSocketConnection = async (websocket)=>{
             send(ws,"error",error); 
         }
     }
+
+    const onclose = (ws)=>{
+        send(ws,"closed","hello");
+    }
+
+    
 
     const  onconnectProducerTransport = async (event, ws) => {
         console.log("sender connected to server");
@@ -156,6 +165,7 @@ const webSocketConnection = async (websocket)=>{
 
 
     const onConsume = async(event,ws)=>{
+        console.log(producer.id);
         const res = await createConsumer(producer,event.rtpCapabilities); 
         console.log("IceCandidates : ",event.rtpCapabilities)
         send(ws,"subscribed",res);

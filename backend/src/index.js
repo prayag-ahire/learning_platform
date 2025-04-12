@@ -15,13 +15,16 @@ import allteacher from './teacher/allteachers.js';
 import {WebSocketServer} from "ws"
 import webSocketConnection from "../src/lib/ws.js";
 import joinstudent from "./teacher/joinstudents.js"
+import peerchat from './student/chat/peerchat.js';
 
 // Initialize Express app and HTTP server
 const app= express();
 const server = http.createServer(app);
 const wss = new  WebSocketServer({server,path:"/ws"});
+// const wss2 = new WebSocketServer({server,path:"/chat"});
 
 webSocketConnection(wss);
+// peerchat(wss2);
 
 // Middleware
 app.use(express.json());

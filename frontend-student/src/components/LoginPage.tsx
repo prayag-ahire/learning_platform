@@ -6,7 +6,7 @@ import * as z from "zod"
 import { useForm } from "react-hook-form";
 import axios from "axios";
 import { Input } from "./ui/input";
-import Cookies from "js-cookie";
+import {ToastContainer ,toast} from "react-toastify"
 import { Link } from "react-router-dom";
 import { useEffect } from "react";
 
@@ -44,12 +44,12 @@ export const LoginPage = ()=>{
         const token = await response.data;
         console.log(token.token);
         localStorage.setItem("token",token.token);
-        // Cookies.set("token",token.toekn,{expires:1,secure:false});
-        alert("yay, login sucseccful!");
+        toast("yay, login sucseccful!")
     }
 
     return(<div>
         <div className="p-4 w-2xl" id='page'>
+            <ToastContainer/>
             <Card>
                 <CardHeader>
                     <CardTitle className="text-2xl"> Login </CardTitle>
