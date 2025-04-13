@@ -17,7 +17,7 @@ const LiveClass = ()=>{
   const [localMedia,setLocalMedia] = useState(true);
 
   const Navigate = useNavigate();
-
+  let roomId:string
   
     useEffect(()=>{
       setTimeout(()=>{
@@ -35,11 +35,57 @@ const LiveClass = ()=>{
 
       const msg = JSON.stringify({
         type:"broadcaster-closed",
-        producerId:producer.id
+        producerId:producer.id,
+        roomId
       }); 
       socket.send(msg);
       Navigate("/")
     }
+
+    const changeStream = (stream:MediaStream)=>{
+      const videotrack = stream.getVideoTracks()[0];
+      const audiotrack = stream.getAudioTracks()[0];
+
+      producer.replaceTrack({track:videotrack});
+      producer.replaceTrack({track:audiotrack});
+      videoElemnt.srcObject = stream;
+      videoElemnt.play();
+
+      setVideo([videotrack,true]);
+      setAudio([audiotrack,true]);
+    }
+
+    const stopOldTrack = ()=>{
+      stream?.getTracks().forEach(track=>track.stop());
+    }
+    
+
+    const mediahandler = async()=>{
+      stopOldTrack();
+      if(!localMedia){
+         stream = await navigator.mediaDevices.getDisplayMedia({audio:true,video:true});
+        changeStream(stream);
+      }else{
+        stream = await navigator.mediaDevices.getUserMedia({audio:true,video:true});
+        changeStream(stream);
+      }
+    }
+
+    const audiohandler = ()=>{
+      if(audios?.[1]){
+        audios[0].enabled = false;
+      }else if(audios?.[1] == false){
+        audios[0].enabled = true;
+      }
+
+    }
+
+    const videohandler = ()=>{
+      if(videos){
+        videos[0].enabled = false;
+      }
+    }
+
 
     socket = new WebSocket("ws://localhost:3000/ws");
 
@@ -47,7 +93,7 @@ const LiveClass = ()=>{
       if (socket.readyState === WebSocket.OPEN) {
         console.log("connected");
         const msg = {
-          type: "getRouterRtpCapabilities",
+          type: "create-room",
         }
         socket.send(JSON.stringify(msg));
       }
@@ -57,13 +103,15 @@ const LiveClass = ()=>{
       const res = JSON.parse(event.data);
 
         switch (res.type) {
+            case 'roomCreated':
+              onroomCreated(res);
+              break;
             case 'routerCapabilities':
               onRouterRtpCapabilities(res);
               break;
     
             case 'ProducerTransportCreated':
               onProducerTransportCreated(res);
-              socket.send(JSON.stringify({type:"try1"}));
               break;
             
             case 'resumed':
@@ -75,6 +123,17 @@ const LiveClass = ()=>{
               break;
           }
     };
+
+    const onroomCreated = (res:string)=>{
+      roomId  = res;
+      console.log(roomId);
+      const msg = {
+        type: "getRouterRtpCapabilities",
+      }
+      socket.send(JSON.stringify(msg));
+    }
+
+
     const loadDevice = async (routerRtpCapabilities:mediasoup.types.RtpCapabilities) => {
       try {
         device = new mediasoup.Device();
@@ -107,51 +166,7 @@ const LiveClass = ()=>{
       }
     };
 
-    const changeStream = (stream:MediaStream)=>{
-      const videotrack = stream.getVideoTracks()[0];
-      const audiotrack = stream.getAudioTracks()[0];
-
-      producer.replaceTrack({track:videotrack});
-      producer.replaceTrack({track:audiotrack});
-      videoElemnt.srcObject = stream;
-      videoElemnt.play();
-
-      setVideo([videotrack,true]);
-      setAudio([audiotrack,true]);
-    }
-
-    const stopOldTrack = ()=>{
-      stream?.getTracks().forEach(track=>track.stop());
-    }
-
-    const mediahandler = async()=>{
-
-      stopOldTrack();
-
-      if(!localMedia){
-         stream = await navigator.mediaDevices.getDisplayMedia({audio:true,video:true});
-        changeStream(stream);
-      }else{
-        stream = await navigator.mediaDevices.getUserMedia({audio:true,video:true});
-        changeStream(stream);
-      }
-    }
-
-    const audiohandler = ()=>{
-      if(audios?.[1]){
-        audios[0].enabled = false;
-      }else if(audios?.[1] == false){
-        audios[0].enabled = true;
-      }
-
-    }
-
-    const videohandler = ()=>{
-      if(videos){
-        videos[0].enabled = false;
-      }
-    }
-
+    
     const publishHandler = ()=>{
       console.log("Starting go Live ")
       document.getElementById("local_stream")?.removeAttribute("hidden");
@@ -176,7 +191,7 @@ const LiveClass = ()=>{
       transport = device.createSendTransport(event.data);
       console.log(event.data);
     
-        transport.on('connect', async ({dtlsParameters }, callback,errback) => {
+        transport.on('connect', async ({dtlsParameters }, callback) => {
           
           console.log("get dtlsParameters : ",{dtlsParameters});
 
@@ -200,7 +215,7 @@ const LiveClass = ()=>{
 
         });
     
-        transport.on('produce', async ({ kind, rtpParameters }, callback,errback) => {
+        transport.on('produce', async ({ kind, rtpParameters }, callback) => {
 
           const message = {
             type: 'produce',
@@ -258,6 +273,12 @@ const LiveClass = ()=>{
           
           const videoTrack = stream?.getVideoTracks()[0];
           producer = await transport.produce({ track: videoTrack });
+          console.log("this is producer",producer);
+          const message = {
+            type: 'iamproducer',
+            producer
+          };
+          socket.send(JSON.stringify(message));
           
         }catch(err){
           console.error(err);
@@ -265,8 +286,6 @@ const LiveClass = ()=>{
           if (statusText) statusText.innerHTML = "failed";
         }
     }
-
-
 
         const getUserMedia = async () => {
             if (!device.canProduce('video')) {
@@ -276,7 +295,6 @@ const LiveClass = ()=>{
             let stream;
             try{
               stream =  await navigator.mediaDevices.getUserMedia({video:true,audio:true});
-              // stream = await navigator.mediaDevices.getDisplayMedia({video:true,audio:true});
             }catch(err){
               console.log(err);
               throw err;

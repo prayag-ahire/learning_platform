@@ -7,13 +7,13 @@ let producer;
 let producerTransport;
 let consumerTransport;
 let consumer;
-const webSocketConnection = async (websocket)=>{
+const webSocketConnection = async (websocketServer)=>{
     try{
         mediasoupRouter = await createWorker();
     }catch(error){
         throw error;
     }
-    websocket.on('connection',(ws)=>{
+    websocketServer.on('connection',(ws)=>{
         ws.id = v4();
         console.log("connected");
 
@@ -37,7 +37,7 @@ const webSocketConnection = async (websocket)=>{
                 break;
 
                 case 'produce':
-                    onProduce(event,ws,websocket);
+                    onProduce(event,ws,websocketServer);
                 break;
 
                 case 'createConsumerTransport':
@@ -55,7 +55,7 @@ const webSocketConnection = async (websocket)=>{
                     onConsume(event,ws);
                     break;
                 case 'broadcaster-closed':
-                    onclose(ws);
+                    onclose(event.producerId,ws);
                     break;
                 default:
                   break;
@@ -85,7 +85,8 @@ const webSocketConnection = async (websocket)=>{
         }
     }
 
-    const onclose = (ws)=>{
+    const onclose = ({producerId,ws})=>{
+        
         send(ws,"closed","hello");
     }
 
@@ -116,7 +117,7 @@ const webSocketConnection = async (websocket)=>{
         send(ws,"resumed","resumed"); 
     }
 
-    const onProduce =async (event,ws,WebSocket)=>{
+    const onProduce =async (event,ws,websocketServer)=>{
             const { kind,rtpParameters} = event;
             producer = await producerTransport.produce({ kind,rtpParameters});
             const res = {
@@ -126,7 +127,7 @@ const webSocketConnection = async (websocket)=>{
             console.log("id : ",res.id);
             console.log("server get IceCandidates : ",event); 
             send(ws,'produced',res);
-            brodcast(WebSocket,'newProducer','new user');
+            brodcast(websocketServer,'newProducer','new user');
         }
 
     const brodcast = (ws,type,msg)=>{
