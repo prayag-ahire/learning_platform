@@ -5,14 +5,15 @@ import { useNavigate } from "react-router-dom";
 
 let device: mediasoup.Device;
 let socket: WebSocket;
+//@ts-ignore
 let producer: mediasoup.types.Producer;
 let transport: mediasoup.types.Transport;
 let stream:MediaStream | undefined;
 let videoElemnt:HTMLVideoElement
 
 const LiveClass = ()=>{
-  const [videos,setVideo] = useState<[MediaStreamTrack,boolean]>();
-  const [audios,setAudio] = useState<[MediaStreamTrack,boolean]>();
+  // const [videos,setVideo] = useState<[MediaStreamTrack,boolean]>();
+  // const [audios,setAudio] = useState<[MediaStreamTrack,boolean]>();
 
   const [localMedia,setLocalMedia] = useState(true);
 
@@ -51,8 +52,8 @@ const LiveClass = ()=>{
       videoElemnt.srcObject = stream;
       videoElemnt.play();
 
-      setVideo([videotrack,true]);
-      setAudio([audiotrack,true]);
+      // setVideo([videotrack,true]);
+      // setAudio([audiotrack,true]);
     }
 
     const stopOldTrack = ()=>{
@@ -71,20 +72,20 @@ const LiveClass = ()=>{
       }
     }
 
-    const audiohandler = ()=>{
-      if(audios?.[1]){
-        audios[0].enabled = false;
-      }else if(audios?.[1] == false){
-        audios[0].enabled = true;
-      }
+    // const audiohandler = ()=>{
+    //   if(audios?.[1]){
+    //     audios[0].enabled = false;
+    //   }else if(audios?.[1] == false){
+    //     audios[0].enabled = true;
+    //   }
 
-    }
+    // }
 
-    const videohandler = ()=>{
-      if(videos){
-        videos[0].enabled = false;
-      }
-    }
+    // const videohandler = ()=>{
+    //   if(videos){
+    //     videos[0].enabled = false;
+    //   }
+    // }
 
 
     socket = new WebSocket("ws://localhost:3000/ws");
@@ -317,12 +318,12 @@ const LiveClass = ()=>{
                         <path strokeLinecap="round" strokeLinejoin="round" d="M9 17.25v1.007a3 3 0 0 1-.879 2.122L7.5 21h9l-.621-.621A3 3 0 0 1 15 18.257V17.25m6-12V15a2.25 2.25 0 0 1-2.25 2.25H5.25A2.25 2.25 0 0 1 3 15V5.25m18 0A2.25 2.25 0 0 0 18.75 3H5.25A2.25 2.25 0 0 0 3 5.25m18 0V12a2.25 2.25 0 0 1-2.25 2.25H5.25A2.25 2.25 0 0 1 3 12V5.25" />
                         </svg>
                     </div>
-                    <div onClick={audiohandler}>
+                    <div >
                         <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="size-6">
                         <path strokeLinecap="round" strokeLinejoin="round" d="M12 18.75a6 6 0 0 0 6-6v-1.5m-6 7.5a6 6 0 0 1-6-6v-1.5m6 7.5v3.75m-3.75 0h7.5M12 15.75a3 3 0 0 1-3-3V4.5a3 3 0 1 1 6 0v8.25a3 3 0 0 1-3 3Z" />
                         </svg> : <div></div>
                     </div>
-                    <div onClick={videohandler}>
+                    <div >
                         <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="size-6">
                         <path strokeLinecap="round" strokeLinejoin="round" d="m15.75 10.5 4.72-4.72a.75.75 0 0 1 1.28.53v11.38a.75.75 0 0 1-1.28.53l-4.72-4.72M4.5 18.75h9a2.25 2.25 0 0 0 2.25-2.25v-9a2.25 2.25 0 0 0-2.25-2.25h-9A2.25 2.25 0 0 0 2.25 7.5v9a2.25 2.25 0 0 0 2.25 2.25Z" />
                         </svg>:<div></div>
