@@ -1,18 +1,22 @@
 import * as mediasoup from "mediasoup-client"
 import { useEffect } from "react";
+import { useNavigate } from "react-router-dom";
+import {v4} from "uuid";
+
+
+
 let device: mediasoup.types.Device;
 let socket: WebSocket;
 let remote_video: HTMLVideoElement | null;
 let transport: mediasoup.types.Transport;
 let remoteStream: MediaStream;
 
-const LiveClass = ()=>{
+const LiveClass = (roomId:string)=>{
 
-    useEffect(()=>{
-      setTimeout(() => {
-        reciverHandler();
-      }, 3000);
-    },[])
+  const Navigate = useNavigate();
+  roomId = "1";
+  const id = v4();
+  useEffect(()=>{
     socket = new WebSocket("ws://localhost:3000/ws");
 
     socket.onopen = () => {
@@ -20,6 +24,7 @@ const LiveClass = ()=>{
         console.log("connected");
         const msg = {
           type: "getRouterRtpCapabilities",
+          roomId
         };
         socket.send(JSON.stringify(msg));
       }
@@ -29,13 +34,13 @@ const LiveClass = ()=>{
 
         const res = JSON.parse(event.data);
 
-        console.log(res);
+        
         switch (res.type) {
             case 'routerCapabilities':
                 onRouterRtpCapabilities(res);
                 break;
             case 'subTransportCreated':
-                onsubTransportCreated(res);
+                onsubTransportCreated(id,res);
                 break;
 
             case 'resumed':
@@ -47,14 +52,15 @@ const LiveClass = ()=>{
               break;
               
             case 'closed':
-                console.log("hello");
-                onBroadcasterclosed()
+                onBroadcasterclosed();
               break;
 
             default:
               break;
           }
     };
+  },[]);
+
        const loadDevice = async (routerRtpCapabilities:mediasoup.types.RtpCapabilities) => {
             try{
                 device = new mediasoup.Device();
@@ -71,9 +77,9 @@ const LiveClass = ()=>{
     
     
     const onRouterRtpCapabilities = (res:any) => {
-        // console.log("socket id :",res.id);
-        
+        console.log(res.data);
         loadDevice(res.data);
+        reciverHandler();
     };
 
     const reciverHandler = ()=>{
@@ -83,6 +89,7 @@ const LiveClass = ()=>{
       const msg = {
         type:"createConsumerTransport",
         forceTcp:false,
+        roomId
       }
       const message = JSON.stringify(msg);
       socket.send(message);
@@ -90,38 +97,42 @@ const LiveClass = ()=>{
 
     const onBroadcasterclosed = ()=>{
       console.log("producer close call");
-      // remoteStream.removeTrack
-      // transport.close();
+      remoteStream.removeTrack
+      transport.close();
+      Navigate("/ ")
       
     }
 
     
-    const onsubTransportCreated =async (event:any)=>{
+    const onsubTransportCreated =async (id:any,event:any)=>{
+
       if(event.error){
         console.error("on sub transport create error :",event.error);
       }
     transport = device.createRecvTransport(event.data);
     console.log("params : ",event.data);
 
-    transport.on('connect',({dtlsParameters},callback,errback)=>{
-      // console.log("connected to server")
-      // console.log(" get dtlsParamters : ",dtlsParameters);
+    transport.on('connect',({dtlsParameters},callback)=>{
+
+      
         const msg={
             type:"connectConsumerTransport",
             transportId:transport.id,
-            dtlsParameters
+            dtlsParameters,
+            roomId,
+            id
         }
-        // console.log("message : ",msg);
         const message = JSON.stringify(msg);
         socket.send(message);
         socket.addEventListener('message',(event)=>{
             let res = JSON.parse(event.data);
             if(res.type == "subConnected"){
-              // console.log("consumer transport connected!!!")
+              console.log("consumer transport sub-connected!!!")
               callback();
             }
         });
       }),
+
       transport.on('connectionstatechange',async (state)=>{
         const statusText = document.getElementById('text_p');
         switch(state){
@@ -132,7 +143,9 @@ const LiveClass = ()=>{
             const remote_video = document.getElementById("remote_stream") as HTMLVideoElement;
             if(remote_video) remote_video.srcObject = remoteStream;
             const msg = {
-              type : "resume"
+              type : "resume",
+              roomId,
+              id
             }
             socket.send(JSON.stringify(msg));
             if(statusText) statusText.innerHTML = "subscribed";
@@ -152,7 +165,9 @@ const LiveClass = ()=>{
       let {rtpCapabilities} = device;
       const msg = {
         type : "consume",
-        rtpCapabilities
+        rtpCapabilities,
+        roomId,
+        id
       }
       socket.send(JSON.stringify(msg));
     }

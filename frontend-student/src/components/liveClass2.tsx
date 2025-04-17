@@ -1,3 +1,4 @@
+import { Avatar, AvatarImage } from "./ui/avatar";
 import { useNavigate } from "react-router-dom"
 
 export const LiveClass2 = ()=>{
@@ -7,6 +8,20 @@ export const LiveClass2 = ()=>{
         Navigate("/startlive");
     }
     return(<div className="flex flex-1 ">
+
+
+          {/* <div className="flex">
+            {jointeacher.map((x)=>(
+              <div key={x.teacher.id} className="flex justify-around p-2 w-1/4 mx-5 my-5 border-2 border-black rounded-2xl ">
+              <div className="grid ">
+                <Avatar className="size-12">
+                  <AvatarImage src={  "https://cdn.pixabay.com/photo/2020/07/01/12/58/icon-5359554_1280.png"} />
+                </Avatar>
+                <p className="text-2xl font-medium">{x.teacher.name} is live now</p>
+              </div></div>))}
+            </div> */}
+
+
         <div className="flex flex-1 items-center justify-center">
             <button  className="flex space-x-2 bg-red-500 text-white font-bold p-2 rounded-2xl" onClick={handler}>
                 <div>

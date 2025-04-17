@@ -1,11 +1,10 @@
 import * as mediasoup from "mediasoup-client"
 import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
-
+import {v4} from "uuid";
 
 let device: mediasoup.Device;
 let socket: WebSocket;
-//@ts-ignore
 let producer: mediasoup.types.Producer;
 let transport: mediasoup.types.Transport;
 let stream:MediaStream | undefined;
@@ -19,12 +18,6 @@ const LiveClass = ()=>{
 
   const Navigate = useNavigate();
   let roomId:string
-  
-    useEffect(()=>{
-      setTimeout(()=>{
-        publishHandler();
-      },5000)
-    },[])
 
     const endhandler = ()=>{
       stream?.getVideoTracks().forEach((track) => {
@@ -88,9 +81,11 @@ const LiveClass = ()=>{
     // }
 
 
+   useEffect(()=>{
     socket = new WebSocket("ws://localhost:3000/ws");
 
     socket.onopen = () => {
+      (socket as any).id = v4();
       if (socket.readyState === WebSocket.OPEN) {
         console.log("connected");
         const msg = {
@@ -105,7 +100,7 @@ const LiveClass = ()=>{
 
         switch (res.type) {
             case 'roomCreated':
-              onroomCreated(res);
+              onroomCreated(res.data);
               break;
             case 'routerCapabilities':
               onRouterRtpCapabilities(res);
@@ -123,13 +118,16 @@ const LiveClass = ()=>{
             default:
               break;
           }
-    };
+    }; 
+  },[]);
 
-    const onroomCreated = (res:string)=>{
-      roomId  = res;
+    const onroomCreated = (id:string)=>{
+      roomId  = id;
+      console.log("this is room id");
       console.log(roomId);
       const msg = {
         type: "getRouterRtpCapabilities",
+        roomId
       }
       socket.send(JSON.stringify(msg));
     }
@@ -156,12 +154,11 @@ const LiveClass = ()=>{
 
     const onRouterRtpCapabilities = async (res:any) => {
       console.log("socket id:", res.id);
-      
+      console.log(res.data)
       try {
         await loadDevice(res.data);
         console.log("Device loaded successfully");
-        
-      
+        publishHandler();
       } catch (error) {
         console.error("Failed to load device:", error);
       }
@@ -177,6 +174,7 @@ const LiveClass = ()=>{
             type : 'createProducerTransport',
             forceTcp:false,
             rtpCapabilities:device.rtpCapabilities,
+            roomId
         }
         console.log("on click",message)
         socket.send(JSON.stringify(message));
@@ -190,7 +188,7 @@ const LiveClass = ()=>{
       }
      
       transport = device.createSendTransport(event.data);
-      console.log(event.data);
+      console.log("ontransportcreated",event);
     
         transport.on('connect', async ({dtlsParameters }, callback) => {
           
@@ -201,6 +199,7 @@ const LiveClass = ()=>{
             transportId:transport.id,
             type: "connectProducerTransport",
             dtlsParameters,
+            roomId
           };
           console.log(JSON.stringify(message));
           socket.send(JSON.stringify(message));
@@ -223,6 +222,7 @@ const LiveClass = ()=>{
             transportId: transport.id,
             kind,
             rtpParameters,
+            roomId
           };
           console.log("send IceCandidates : ",message);
 
@@ -274,12 +274,8 @@ const LiveClass = ()=>{
           
           const videoTrack = stream?.getVideoTracks()[0];
           producer = await transport.produce({ track: videoTrack });
-          console.log("this is producer",producer);
-          const message = {
-            type: 'iamproducer',
-            producer
-          };
-          socket.send(JSON.stringify(message));
+          
+         
           
         }catch(err){
           console.error(err);
@@ -321,12 +317,12 @@ const LiveClass = ()=>{
                     <div >
                         <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="size-6">
                         <path strokeLinecap="round" strokeLinejoin="round" d="M12 18.75a6 6 0 0 0 6-6v-1.5m-6 7.5a6 6 0 0 1-6-6v-1.5m6 7.5v3.75m-3.75 0h7.5M12 15.75a3 3 0 0 1-3-3V4.5a3 3 0 1 1 6 0v8.25a3 3 0 0 1-3 3Z" />
-                        </svg> : <div></div>
+                        </svg> <div></div>
                     </div>
                     <div >
                         <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="size-6">
                         <path strokeLinecap="round" strokeLinejoin="round" d="m15.75 10.5 4.72-4.72a.75.75 0 0 1 1.28.53v11.38a.75.75 0 0 1-1.28.53l-4.72-4.72M4.5 18.75h9a2.25 2.25 0 0 0 2.25-2.25v-9a2.25 2.25 0 0 0-2.25-2.25h-9A2.25 2.25 0 0 0 2.25 7.5v9a2.25 2.25 0 0 0 2.25 2.25Z" />
-                        </svg>:<div></div>
+                        </svg><div></div>
                     </div> 
                     <div onClick={endhandler}>
                         <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="size-6">
