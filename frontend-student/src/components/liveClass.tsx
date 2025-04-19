@@ -1,4 +1,5 @@
 import * as mediasoup from "mediasoup-client"
+import { Consumer } from "mediasoup-client/types";
 import { useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import {v4} from "uuid";
@@ -36,6 +37,7 @@ const LiveClass = (roomId:string)=>{
 
         
         switch (res.type) {
+
             case 'routerCapabilities':
                 onRouterRtpCapabilities(res);
                 break;
@@ -60,6 +62,7 @@ const LiveClass = (roomId:string)=>{
           }
     };
   },[]);
+
 
        const loadDevice = async (routerRtpCapabilities:mediasoup.types.RtpCapabilities) => {
             try{
@@ -89,7 +92,8 @@ const LiveClass = (roomId:string)=>{
       const msg = {
         type:"createConsumerTransport",
         forceTcp:false,
-        roomId
+        roomId,
+        id
       }
       const message = JSON.stringify(msg);
       socket.send(message);
@@ -114,7 +118,6 @@ const LiveClass = (roomId:string)=>{
 
     transport.on('connect',({dtlsParameters},callback)=>{
 
-      
         const msg={
             type:"connectConsumerTransport",
             transportId:transport.id,
@@ -134,11 +137,12 @@ const LiveClass = (roomId:string)=>{
       }),
 
       transport.on('connectionstatechange',async (state)=>{
-        const statusText = document.getElementById('text_p');
+
         switch(state){
+
           case 'connecting':
-            if(statusText) statusText.innerHTML = "subscribing...";
             break;
+
           case 'connected':
             const remote_video = document.getElementById("remote_stream") as HTMLVideoElement;
             if(remote_video) remote_video.srcObject = remoteStream;
@@ -148,21 +152,23 @@ const LiveClass = (roomId:string)=>{
               id
             }
             socket.send(JSON.stringify(msg));
-            if(statusText) statusText.innerHTML = "subscribed";
             break;
+
           case 'failed':
             transport.close();
-            if(statusText) statusText.innerHTML = "failed";
             break;
+
           default:
             break;
         }
       });
-      const stream = await consumer();
+      await consumer();
     }
 
     const consumer = async ()=>{
+      console.log("this is from consumer")
       let {rtpCapabilities} = device;
+      console.log(rtpCapabilities);
       const msg = {
         type : "consume",
         rtpCapabilities,
@@ -174,24 +180,12 @@ const LiveClass = (roomId:string)=>{
 
 
     const onSubscribe = async (event:any) => {
-      const res = JSON.parse(event.data);
-      const {
-        producerId,
-        id,
-        kind,
-        rtpParameters,
-      } = res.data;
 
-      // let codecOption = {};
-   
-      const consumer = await transport.consume({
-        id,
-        producerId,
-        kind,
-        rtpParameters,
-        
-      });
-      console.log("this is consumer :",consumer);
+      
+      const temp = JSON.parse(event.data);
+      const res:Consumer[] = temp.data;
+      
+      console.log(temp.data);
 
       if (!remoteStream ) {
         remoteStream = new MediaStream();
@@ -200,20 +194,31 @@ const LiveClass = (roomId:string)=>{
 
         if(remote_video) remote_video.srcObject = remoteStream;
 
-        remoteStream.addTrack(consumer.track);  
     }
+
+      res.forEach(async(x)=>{
+        const {
+          producerId,
+          id,
+          kind,
+          rtpParameters,
+        } = x
+        const consumer = await transport.consume({
+          id,
+          producerId,
+          kind,
+          rtpParameters
+        })
+
+        remoteStream.addTrack(consumer.track);
+      })
   }
 
       return(<div>
         <div className="w-full flex flex-row ">
             <video  className="w-5xl" id="remote_stream" autoPlay></video>
             <div hidden className="border-2 w-2xl border-amber-950" id="chat"></div>
-
         </div>
-        <div><p id='text_p'></p></div>
-        {/* <div>
-            <button className="bg-red-500 text-white p-1 rounded-sm"  id="btn_sub" onClick={reciverHandler}>connect</button>
-        </div> */}
       </div>)
     
 }

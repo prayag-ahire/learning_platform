@@ -11,7 +11,6 @@ export const DashBoard = ()=>{
         setDateTime(date.toLocaleString('en-in',{weekday:'long',hour:'2-digit',minute:"2-digit",hour12:true}));
         setInterval(()=>{
             setDateTime(date.toLocaleString('en-in',{weekday:'long',hour:'2-digit',minute:"2-digit",hour12:true}));
-            console.log(datetime);    
         },60000);
     },[])
     return(<div >
