@@ -1,12 +1,13 @@
 import * as mediasoup from "mediasoup";
-import {config} from "../config.js";
+import {config} from "../config";
+import { Router } from "mediasoup/node/lib/RouterTypes";
+import { WorkerLogLevel, WorkerLogTag, RtpCodecCapability } from "mediasoup/node/lib/types";
 
- 
 
-const createWorker = async () => {
+const createWorker = async ():Promise<Router> => {
     const worker = await mediasoup.createWorker({
-        logLevel:config.mediasoup.workerSetting.logLevel,
-        logTags: config.mediasoup.workerSetting.logTags,
+        logLevel: config.mediasoup.workerSetting.logLevel as WorkerLogLevel,
+        logTags: config.mediasoup.workerSetting.logTags as WorkerLogTag[],
         rtcMinPort:config.mediasoup.workerSetting.rtcMinPort,
         rtcMaxPort:config.mediasoup.workerSetting.rtcMaxPort,
     })
@@ -18,7 +19,7 @@ const createWorker = async () => {
         },2000);
     })
 
-    const mediaCodecs = config.mediasoup.routerOptions.mediaCodecs;
+    const mediaCodecs = config.mediasoup.routerOptions.mediaCodecs as RtpCodecCapability[];
     const mediasoupRouter = await worker.createRouter({mediaCodecs});
     return mediasoupRouter;
 }

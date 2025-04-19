@@ -24,8 +24,8 @@ export class RoomManager{
         const router = await createWorker();
         const room = new Room(roomId,router);
         this.rooms.set(roomId,room);
-        console.log("this is room - ",room,"this is router - ",router);
-        console.log("room created",this.rooms);
+        // console.log("this is room - ",room,"this is router - ",router);
+        // console.log("room created",this.rooms);
         return room;
     }
 
@@ -35,19 +35,18 @@ export class RoomManager{
         return this.rooms.get(roomId);
     }
 
+
     getRoomRouter(roomId:string){
-        console.log(roomId);
+        // console.log(roomId);
         const room = this.rooms.get(roomId);
-        console.log("this is room - ",room);
+        // console.log("this is room - ",room);
         return room?.getRouter();
     }
 
 
 
     getProducer(roomId:string){
-        const room = this.rooms.get(roomId);
-        console.log(room);
-        console.log(room?.getProducer());        
+        const room = this.rooms.get(roomId);      
         return room?.getProducer();
     }
 
@@ -62,9 +61,9 @@ export class RoomManager{
         return room?.getConsumer(id);
     }
 
-    setConsumer(roomId:string,id:string,consumer:Consumer){
+    setConsumer(roomId:string,id:string,consumer:Consumer[]){
         const room = this.rooms.get(roomId);
-        room?.setConsumer(id,consumer);
+        return room?.setConsumer(id,consumer);
     }
 
     setProducerTransport(roomId:string,transport:Transport){
@@ -83,10 +82,16 @@ export class RoomManager{
     }
 
     getProducerTransport(roomId:string){
-        console.log("this is inner class getproducertransport",roomId);
+        // console.log("this is inner class getproducertransport",roomId);
         const room = this.rooms.get(roomId);
-        console.log("room is -", room);
+        // console.log("room is -", room);
         return room?.getProducerTransport();
+    }
+
+    getallconsumer(){
+        const room = this.rooms.get("1");
+        
+        return room?.getallConsumer();
     }
 
 

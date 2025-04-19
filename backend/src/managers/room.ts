@@ -7,30 +7,38 @@ export class Room {
 
     private id:string;
     private router:Router;
-    private producer?:Producer;
+    private producer:Producer[];
     private producerTransport?:Transport;
-    private consumer:Map<string,Consumer>;
+    private consumer:Map<string,Consumer[]>;
     private consumerTransport?:Transport;
+
 
     constructor(id:string,router:Router){
         this.id = id,
         this.router = router,
         this.consumer = new Map();
+        this.producer = [];
+    }
+
+    getallConsumer(){
+        console.log("this is producer",this.producer);
+        console.log("this is allconsumer",this.consumer);
+        return this.consumer;
     }
 
     setProducer(producer:Producer){
-        if(this.producer){
-            throw new Error("producer already exist in this room");
-        }
-        this.producer = producer;
+        // console.log("this is producer from prarmters -----------",producer);
+        this.producer.push(producer);
+        // console.log("This is producer form room class -----------------",this.producer);
     }
+
 
     getProducer(){
         console.log(this.producer);
         return this.producer;
     }
 
-    setConsumer(id:string,consumer:Consumer){
+    setConsumer(id:string,consumer:Consumer[]){
         this.consumer.set(id,consumer);
     }
 
@@ -42,7 +50,7 @@ export class Room {
 
     setProducerTransport(transport:Transport){
         this.producerTransport = transport;
-        // console.log("this is producertransport from class set",this.producerTransport);
+        
     }
 
     setConsumerTransport(transport:Transport){
@@ -50,7 +58,7 @@ export class Room {
     }
 
     getProducerTransport(){
-        // console.log("this producertransport from class get",this.producerTransport);
+        
         return this.producerTransport;
     }
 
@@ -58,7 +66,7 @@ export class Room {
         return this.consumerTransport;
     }
 
-    addConsumer(consumerId:string,consumer:Consumer){
+    addConsumer(consumerId:string,consumer:Consumer[]){
         this.consumer.set(consumerId,consumer); 
     }
 
@@ -71,7 +79,7 @@ export class Room {
     }
 
     close(){
-        this.consumer.forEach((x)=>x.close());
+        this.consumer.forEach((x)=>x.map((c)=>c.close()));
         this.router.close();
         console.log("room close");
     }

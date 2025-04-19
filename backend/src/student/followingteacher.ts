@@ -1,6 +1,6 @@
 import { PrismaClient } from "@prisma/client";
 import { Router } from "express";
-import jwt from "jsonwebtoken"
+import jwt, { JwtPayload } from "jsonwebtoken"
 
 const router = Router();
 const prisma = new PrismaClient();
@@ -8,7 +8,8 @@ const prisma = new PrismaClient();
 router.post('/subscribe',async(req,res)=>{
     try{
         const {teacherid,token} = req.body;
-        const studentid = jwt.verify(token,"this").id;
+        const nans = jwt.verify(token,"this");
+        const studentid = (nans as JwtPayload).id;
         console.log(teacherid,studentid);
 
         const ts = await  prisma.studentTeacher.create({

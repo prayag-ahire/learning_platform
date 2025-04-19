@@ -1,17 +1,17 @@
 import { PrismaClient } from "@prisma/client";
 import bcrypt from "bcryptjs";
-import { Router } from "express";
+import { Request, Response, Router } from "express";
 import jwt from "jsonwebtoken"
 const router = Router();
 const prisma = new PrismaClient();
 
-router.post('/login',async (req,res)=>{
+router.post('/login',async (req:Request,res:Response):Promise<any>=>{
 
     const {email,password} = req.body
 
     console.log(email,password);
     try{
-        const user = await prisma.teacher.findFirst({
+        const user = await prisma.student.findFirst({
             where:{
                 email
             }

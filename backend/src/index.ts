@@ -13,9 +13,9 @@ import  subscribe  from './student/followingteacher.js';
 // import thome from './teacher/home';
 import allteacher from './teacher/allteachers.js';
 import {WebSocketServer} from "ws"
-import webSocketConnection from "../src/lib/ws.js";
+import webSocketConnection from "./lib/ws.js";
 import joinstudent from "./teacher/joinstudents.js"
-import peerchat from './student/chat/peerchat.js';
+
 
 // Initialize Express app and HTTP server
 const app= express();

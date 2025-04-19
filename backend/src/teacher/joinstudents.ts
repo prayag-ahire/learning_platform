@@ -1,18 +1,19 @@
 import { PrismaClient } from "@prisma/client";
-import { Router } from "express";
-import jwt from "jsonwebtoken"
+import { Request, Response, Router } from "express";
+import jwt,{JwtPayload} from "jsonwebtoken"
 
 const router = Router();
 const prisma = new PrismaClient();
 
-router.post('/joinstudent',async(req,res)=>{
+router.post('/joinstudent',async(req:Request,res:Response)=>{
     try{
         const {token} = req.body;
-        const ans = jwt.verify(token,"this").id;
+        const nans = jwt.verify(token,"this" );
+        const ans = (nans as JwtPayload).id;
         console.log(ans);
         const user = await prisma.teacher.findFirst({
             where:{
-                id:ans.id
+                id:ans
             },
             select:{
                 name:true,

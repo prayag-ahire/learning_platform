@@ -1,8 +1,9 @@
+import { Router } from "mediasoup/node/lib/RouterTypes.js";
 import { config } from "../config.js"
 
 
 
-export const createWebRtcTransport =async (mediasoupRouter)=>{
+export const createWebRtcTransport =async (mediasoupRouter:Router)=>{
     const {
         maxIncomeBitrate,
         initialAvailableOutgoingBitrate
