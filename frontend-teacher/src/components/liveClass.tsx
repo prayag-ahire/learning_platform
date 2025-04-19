@@ -5,7 +5,8 @@ import {v4} from "uuid";
 
 let device: mediasoup.Device;
 let socket: WebSocket;
-let producer: mediasoup.types.Producer;
+let producer1: mediasoup.types.Producer;
+let producer2: mediasoup.types.Producer;
 let transport: mediasoup.types.Transport;
 let stream:MediaStream | undefined;
 let videoElemnt:HTMLVideoElement
@@ -25,11 +26,11 @@ const LiveClass = ()=>{
       });    
 
       transport.close();
-      producer.close();
+      producer1.close();
 
       const msg = JSON.stringify({
         type:"broadcaster-closed",
-        producerId:producer.id,
+        producerId:producer1.id,
         roomId
       }); 
       socket.send(msg);
@@ -40,8 +41,8 @@ const LiveClass = ()=>{
       const videotrack = stream.getVideoTracks()[0];
       const audiotrack = stream.getAudioTracks()[0];
 
-      producer.replaceTrack({track:videotrack});
-      producer.replaceTrack({track:audiotrack});
+      producer1.replaceTrack({track:videotrack});
+      producer2.replaceTrack({track:audiotrack});
       videoElemnt.srcObject = stream;
       videoElemnt.play();
 
@@ -159,6 +160,7 @@ const LiveClass = ()=>{
         await loadDevice(res.data);
         console.log("Device loaded successfully");
         publishHandler();
+
       } catch (error) {
         console.error("Failed to load device:", error);
       }
@@ -237,25 +239,19 @@ const LiveClass = ()=>{
         });
         
         transport.on('connectionstatechange', async (state) => {
-            const statusText = document.getElementById('text_p');
 
           switch (state) {
             case 'connecting':
-                console.log("connecting from stat change");
-                    if(statusText) statusText.innerHTML = "publishing.....";
+                
                 break;
 
             case 'connected':
-                console.log("connected from stat change");
-                if(statusText) statusText.innerHTML = "published";
                 const videoele = document.getElementById('local_stream') as HTMLVideoElement;
                 if(stream && videoele) videoele.srcObject = stream;
                 break;
 
             case 'failed':
-              console.log("failed from stat change");
               transport.close();
-              if(statusText) statusText.innerHTML = "failed";
               break;
 
             default:
@@ -273,7 +269,9 @@ const LiveClass = ()=>{
           
           
           const videoTrack = stream?.getVideoTracks()[0];
-          producer = await transport.produce({ track: videoTrack });
+          const audioTrack = stream?.getAudioTracks()[0];
+          producer1 = await transport.produce({ track: videoTrack });
+          producer2 = await transport.produce({ track: audioTrack });
           
          
           
