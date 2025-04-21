@@ -24,8 +24,6 @@ export class RoomManager{
         const router = await createWorker();
         const room = new Room(roomId,router);
         this.rooms.set(roomId,room);
-        // console.log("this is room - ",room,"this is router - ",router);
-        // console.log("room created",this.rooms);
         return room;
     }
 

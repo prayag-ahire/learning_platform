@@ -13,7 +13,7 @@ router.get("/allteacher", async (req, res) => {
                 name:true,
                 id:true
             }
-        });
+        }); 
         res.status(200).json({ teachers });
 
     } catch (error) {

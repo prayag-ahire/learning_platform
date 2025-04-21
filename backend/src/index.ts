@@ -15,6 +15,9 @@ import allteacher from './teacher/allteachers.js';
 import {WebSocketServer} from "ws"
 import webSocketConnection from "./lib/ws.js";
 import joinstudent from "./teacher/joinstudents.js"
+import getMatrial from "./student/liveclass.js"
+import me from "./student/user/me.js"
+import me2 from "./teacher/user/me.js"
 
 
 // Initialize Express app and HTTP server
@@ -36,12 +39,17 @@ const port = 3000;
 app.use('/api/v1/student', slogin);
 app.use('/api/v1/student', ssignup);
 app.use('/api/v1/student',subscribe);
+app.use('/api/v1/student',getMatrial);
+app.use('/api/v1/student',me);
 // Teacher routes
 // app.use('/api/v1/teacher', thome);
+
+
 app.use('/api/v1/teacher', tlogin);
 app.use('/api/v1/teacher', tsignup);
 app.use('/api/v1/teacher', allteacher);
 app.use('/api/v1/teacher/',joinstudent);
+app.use('/api/v1/teacher',me2);
 
 // Start server
 server.listen(port, () => {

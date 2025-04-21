@@ -3,17 +3,26 @@ import createWebRtcTransport from "./createWebRtcTransport.js";
 import {v4} from "uuid";
 import { WebSocket, WebSocketServer } from "ws";
 import {RoomManager} from "../managers/roomManager.js"
+import { ChatManager } from "../managers/chatManager.js";
+// import prisma from "../prismaClient.js";
+import  jwt, { JwtPayload }  from "jsonwebtoken";
+import { PrismaClient } from "@prisma/client";
 
 let roomManger:RoomManager;
+let chatManager:ChatManager = ChatManager.getInstance();
 let genrateRoomId = 1;
+let id:number;
 
 export const webSocketConnection = async (websocket:WebSocketServer)=>{
     try{
        
         roomManger = new RoomManager();
+        
+
     }catch(error){
         throw error;
     }
+    const prisma = new PrismaClient();
     websocket.on('connection',(ws:WebSocket)=>{
         (ws as any).id = v4();
 
@@ -23,9 +32,15 @@ export const webSocketConnection = async (websocket:WebSocketServer)=>{
             console.log(event);
             switch(event.type){
 
+                case "chat":
+                    chatManager.addMessage(event.data);
+                    brodcast(websocket,"livechat",chatManager.getMessages());
+                    console.log("this is chat message",event.data);
+                    break;
+
                 case "create-room":
                     const roomId = genrateRoomId++;
-                    onCreateRoom(roomId.toString(),ws);
+                    onCreateRoom(event,roomId.toString(),ws);
                     break;
 
                 case 'getRouterRtpCapabilities':
@@ -44,7 +59,6 @@ export const webSocketConnection = async (websocket:WebSocketServer)=>{
                     onProduce(event,ws,websocket);
                     // console.log("This is producer -------",roomManger.getProducer("1"));
                 break;
-
 
                 case 'createConsumerTransport':
                     oncreateconsumerTransport(event,ws);
@@ -73,13 +87,47 @@ export const webSocketConnection = async (websocket:WebSocketServer)=>{
     });
 
     
-    const onclose = (event:any,ws:WebSocketServer)=>{
+    const onclose = async(event:any,ws:WebSocketServer)=>{
         roomManger.removeRoom(event.roomId);
-        brodcast(websocket,"closed","room closed by producer");
+        try{
+            const tt = await prisma.teacher.update({
+                where:{
+                 id:id
+             },
+             data:{
+                 room:"0",
+                 live:false
+             }
+            })
+            console.log(tt);
+        }catch(error){
+            console.error(error);
+        }
+        brodcast(websocket,"closed",event.roomId);
        
     }
 
-    const onCreateRoom = async(roomId:string,ws:WebSocket)=>{
+    const onCreateRoom = async(event:any,roomId:string,ws:WebSocket)=>{
+        const token = event.token;
+        const user = jwt.verify(token,"this");
+        id = (user as JwtPayload).id;
+        console.log(id);
+
+        try{
+            const tt = await prisma.teacher.update({
+                where:{
+                 id:id
+             },
+             data:{
+                 room:roomId,
+                 live:true
+             }
+            })
+            console.log(tt);
+        }catch(error){
+            console.error(error);
+        }
+        
         await roomManger.createRoom(roomId);
         send(ws,"roomCreated",roomId);
         console.log(roomManger.getRoom(roomId));

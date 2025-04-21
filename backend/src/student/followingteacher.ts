@@ -30,8 +30,10 @@ router.post('/subscribe',async(req,res)=>{
 })
 
 router.post("/jointeacher",async(req,res)=>{
-    const {stid} = req.body;
-
+    const token = req.body;
+    console.log(token);
+    const use = jwt.verify(token.token,"this");
+    const stid = (use as JwtPayload).id;
     const user = await prisma.student.findFirst({
         where:{
             id:stid

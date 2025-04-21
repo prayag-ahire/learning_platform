@@ -1,0 +1,3 @@
+-- AlterTable
+ALTER TABLE "Teacher" ADD COLUMN     "live" BOOLEAN NOT NULL DEFAULT false,
+ADD COLUMN     "room" TEXT NOT NULL DEFAULT '0';
