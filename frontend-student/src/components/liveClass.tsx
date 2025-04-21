@@ -1,7 +1,7 @@
 import * as mediasoup from "mediasoup-client"
 import { Consumer } from "mediasoup-client/types";
 import { useEffect } from "react";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, useSearchParams } from "react-router-dom";
 import {v4} from "uuid";
 
 
@@ -15,7 +15,8 @@ let remoteStream: MediaStream;
 const LiveClass = (roomId:string)=>{
 
   const Navigate = useNavigate();
-  roomId = "1";
+  const [searchParams] = useSearchParams();
+  roomId = searchParams.get("room") || " ";
   const id = v4();
   useEffect(()=>{
     socket = new WebSocket("ws://localhost:3000/ws");
@@ -54,7 +55,7 @@ const LiveClass = (roomId:string)=>{
               break;
               
             case 'closed':
-                onBroadcasterclosed();
+                onBroadcasterclosed(res.data);
               break;
 
             default:
@@ -99,12 +100,14 @@ const LiveClass = (roomId:string)=>{
       socket.send(message);
     } 
 
-    const onBroadcasterclosed = ()=>{
-      console.log("producer close call");
+    const onBroadcasterclosed = (event:any)=>{
+      console.log("this is from close event",event);
+      if(event === roomId){
+        console.log("producer close call");
       remoteStream.removeTrack
       transport.close();
       Navigate("/ ")
-      
+      }
     }
 
     

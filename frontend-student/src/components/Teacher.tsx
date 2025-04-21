@@ -9,10 +9,12 @@ const Teacher = ()=>{
     const [teachers,setteachers] = useState<any[]>([])
     const [jointeacher,setJoinTeacher] = useState<any[]>([]);
     const token = localStorage.getItem("token");
+   
 
     useEffect(()=>{
         try{
             const fetchteacher = async()=>{
+              console.log(token);
                 const response = await axios.get("http://localhost:3000/api/v1/teacher/allteacher");
                 setteachers(response.data.teachers);
 
