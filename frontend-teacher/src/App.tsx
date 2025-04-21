@@ -15,7 +15,7 @@ function App() {
 
   return (
     <>
-      <div className='flex flex-col min-h-screen'>
+      <div className='flex flex-col min-h-screen bg-zinc-900'>
         <header>
           <div className='flex h-16 items-center my-3 justify-between'>
             <NavBar/>

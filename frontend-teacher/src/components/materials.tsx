@@ -20,7 +20,7 @@ export const Materials = ()=>{
 
     return(<div className="w-full h-full scroll-auto">
             <div className=" grid   border-black m-2 ">
-                <div className="font-bold p-2 text-2xl"><p>Upload New Matrial</p></div>
+                <div className="font-bold p-2 text-2xl text-white"><p>Upload New Matrial</p></div>
                 <input type="file" hidden id="myfile" onChange={(e)=>{fileHandler(e)}}></input>
                 <div className=" rounded-2xl m-2 bg-amber-400 h-90  flex flex-col items-center justify-center " onClick={clickevent}>
                          <div className="flex space-x-2  bg-white text-black   font-bold p-3  rounded-sm">

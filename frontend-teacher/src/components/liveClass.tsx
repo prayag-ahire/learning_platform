@@ -1,29 +1,36 @@
+import { useSocket } from "@/hooks/useSocket";
 import * as mediasoup from "mediasoup-client"
 import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import {v4} from "uuid";
 
 let device: mediasoup.Device;
-let socket: WebSocket;
 let producer1: mediasoup.types.Producer;
 let producer2: mediasoup.types.Producer;
 let transport: mediasoup.types.Transport;
 let stream:MediaStream | undefined;
 let videoElemnt:HTMLVideoElement
+let videoTrack:MediaStreamTrack | undefined;
+let audioTrack:MediaStreamTrack | undefined;
+
+interface chat {
+  user:string;
+  message:string;
+  timestamp:string;
+}
+
+export let livechat:chat[] = [];
 
 const LiveClass = ()=>{
-  // const [videos,setVideo] = useState<[MediaStreamTrack,boolean]>();
-  // const [audios,setAudio] = useState<[MediaStreamTrack,boolean]>();
 
-  const [localMedia,setLocalMedia] = useState(true);
+  const [localMedia,setLocalMedia] = useState(false);
+  const socket = useSocket();
 
   const Navigate = useNavigate();
   let roomId:string
 
     const endhandler = ()=>{
-      stream?.getVideoTracks().forEach((track) => {
-        track.stop();
-      });    
+      stopOldTrack();
 
       transport.close();
       producer1.close();
@@ -33,21 +40,23 @@ const LiveClass = ()=>{
         producerId:producer1.id,
         roomId
       }); 
-      socket.send(msg);
+      socket?.send(msg);
       Navigate("/")
     }
 
     const changeStream = (stream:MediaStream)=>{
-      const videotrack = stream.getVideoTracks()[0];
-      const audiotrack = stream.getAudioTracks()[0];
 
-      producer1.replaceTrack({track:videotrack});
-      producer2.replaceTrack({track:audiotrack});
+       videoTrack = stream.getVideoTracks()[0];
+       audioTrack = stream.getAudioTracks()[0];
+
+      producer1.replaceTrack({track:videoTrack || null});
+      producer2.replaceTrack({track:audioTrack || null});
       videoElemnt.srcObject = stream;
       videoElemnt.play();
 
-      // setVideo([videotrack,true]);
-      // setAudio([audiotrack,true]);
+    }
+    const chatHandler = ()=>{
+      
     }
 
     const stopOldTrack = ()=>{
@@ -66,36 +75,39 @@ const LiveClass = ()=>{
       }
     }
 
-    // const audiohandler = ()=>{
-    //   if(audios?.[1]){
-    //     audios[0].enabled = false;
-    //   }else if(audios?.[1] == false){
-    //     audios[0].enabled = true;
-    //   }
+    const audioHandler = ()=>{
+      if(audioTrack?.enabled){
+        audioTrack.enabled = false;
+      }else{
+        audioTrack!.enabled = true;
+      }
+    }
 
-    // }
-
-    // const videohandler = ()=>{
-    //   if(videos){
-    //     videos[0].enabled = false;
-    //   }
-    // }
-
-
-   useEffect(()=>{
-    socket = new WebSocket("ws://localhost:3000/ws");
-
-    socket.onopen = () => {
-      (socket as any).id = v4();
-      if (socket.readyState === WebSocket.OPEN) {
-        console.log("connected");
-        const msg = {
-          type: "create-room",
-        }
-        socket.send(JSON.stringify(msg));
+    const videoHandler = ()=>{
+      if(videoTrack?.enabled){
+        videoTrack.enabled = false;
+      }else{
+        videoTrack!.enabled = true;
       }
     }
     
+
+
+
+   useEffect(()=>{
+    if(socket == null) return;
+    console.log(socket);
+    
+    (socket as any).id = v4();
+            
+    if (socket.readyState === WebSocket.OPEN) {
+        console.log("connected");
+        const msg = {
+          type: "create-room",
+          token: localStorage.getItem("token"),
+        }
+        socket.send(JSON.stringify(msg));
+      }
     socket.onmessage = (event)=>{
       const res = JSON.parse(event.data);
 
@@ -115,22 +127,31 @@ const LiveClass = ()=>{
               console.log(event.data);
               break;
 
-            
+            case 'chat':
+
+
+            case "livechat":
+              livechat = event.data;
+              console.log("this is live chat",livechat);
+              break;
             default:
               break;
           }
     }; 
-  },[]);
+
+  },[socket]);
 
     const onroomCreated = (id:string)=>{
       roomId  = id;
       console.log("this is room id");
       console.log(roomId);
+
+
       const msg = {
         type: "getRouterRtpCapabilities",
         roomId
       }
-      socket.send(JSON.stringify(msg));
+      socket?.send(JSON.stringify(msg));
     }
 
 
@@ -179,7 +200,7 @@ const LiveClass = ()=>{
             roomId
         }
         console.log("on click",message)
-        socket.send(JSON.stringify(message));
+        socket?.send(JSON.stringify(message));
     }
 
 
@@ -204,9 +225,9 @@ const LiveClass = ()=>{
             roomId
           };
           console.log(JSON.stringify(message));
-          socket.send(JSON.stringify(message));
+          socket?.send(JSON.stringify(message));
           
-          socket.addEventListener('message',(event)=>{
+          socket?.addEventListener('message',(event)=>{
             let res = JSON.parse(event.data);
             console.log(res);
             if(res.type === "producerConnected"){
@@ -228,9 +249,9 @@ const LiveClass = ()=>{
           };
           console.log("send IceCandidates : ",message);
 
-          socket.send(JSON.stringify(message));
+          socket?.send(JSON.stringify(message));
 
-          socket.addEventListener('message',(event)=>{
+          socket?.addEventListener('message',(event)=>{
             let res = JSON.parse(event.data);
             if(res.type == "produced"){
               callback(res.data.id);
@@ -261,15 +282,17 @@ const LiveClass = ()=>{
      
         try{
           stream = await getUserMedia();
+          
+
           console.log("this is stream : ",stream);
           videoElemnt = document.getElementById('local_stream') as HTMLVideoElement;
           videoElemnt.srcObject = stream || null;
           videoElemnt.muted = true;
           videoElemnt.play();
           
+          videoTrack = stream?.getVideoTracks()[0];
+          audioTrack = stream?.getAudioTracks()[0];
           
-          const videoTrack = stream?.getVideoTracks()[0];
-          const audioTrack = stream?.getAudioTracks()[0];
           producer1 = await transport.produce({ track: videoTrack });
           producer2 = await transport.produce({ track: audioTrack });
           
@@ -290,6 +313,8 @@ const LiveClass = ()=>{
             let stream;
             try{
               stream =  await navigator.mediaDevices.getUserMedia({video:true,audio:true});
+              
+
             }catch(err){
               console.log(err);
               throw err;
@@ -297,27 +322,62 @@ const LiveClass = ()=>{
             return stream;
           };
 
+        const handler = (e:any)=>{  
+            e.preventDefault();
+
+            const msg = e.target[0].value;
+            e.target.reset();
+        }
+
           
       return(<div className="group">
         <div className="flex flex-row w-full h-full ">
-            <video hidden className="border-2 w-5xl h-full " id="local_stream" controls autoPlay></video>
-            <div hidden className="border-2 w-2xl border-amber-950" id="chat"></div>
+            <video hidden className=" w-5xl  " id="local_stream" controls autoPlay></video>
+            <form onClick={handler}>
+            <div className="grid w-2xl h-[calc(96.7vh-64px)] grid-rows-[90%_10%] border bg-zinc-700  overflow-hidden">
+                        {/* Chat Messages */}
+                        <div className="overflow-y-auto h-full p-4 ">
+                          {/* map your messages here */}
+                          {livechat.map((x)=>{
+                                      return <div className="bg-gray-400 w-20 rounded-sm pl-2 m-2">
+                                                  <p className="font-semibold text-lg">{x.message}</p>
+                                                  <p className="text-xs">{x.timestamp}</p>
+                                              </div>
+                                    })}
+                        </div>
+
+                        {/* Input Box */}
+                        <div className=" p-3  flex items-center">
+                          <input
+                            type="text"
+                            placeholder="Type your message..."
+                            className="bg-white flex-1 border border-gray-300 rounded-lg px-3 py-2 focus:outline-none"
+                          />
+                          <button className="ml-2 px-4 py-2 bg-blue-500 text-white rounded-lg" type="submit">
+                            Send
+                          </button>
+                        </div>
+                  </div>
+            </form>
+            
         </div>
         {/* <div><p id='text_p'></p></div> */}
         <div className="absolute bottom-20 left-20 opacity-0 group-hover:opacity-60 transition-opacity duration-300">
                 <div className="w-full flex flex-col items-center ">
                 <div className="flex justify-around w-2xl h-10  text-white bg-black  border-2 rounded-2xl  items-center">
+                   
                     <div onClick={()=>{ setLocalMedia(x=>x==true?false:true); mediahandler()}}>
                         <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="size-6">
                         <path strokeLinecap="round" strokeLinejoin="round" d="M9 17.25v1.007a3 3 0 0 1-.879 2.122L7.5 21h9l-.621-.621A3 3 0 0 1 15 18.257V17.25m6-12V15a2.25 2.25 0 0 1-2.25 2.25H5.25A2.25 2.25 0 0 1 3 15V5.25m18 0A2.25 2.25 0 0 0 18.75 3H5.25A2.25 2.25 0 0 0 3 5.25m18 0V12a2.25 2.25 0 0 1-2.25 2.25H5.25A2.25 2.25 0 0 1 3 12V5.25" />
                         </svg>
                     </div>
-                    <div >
+
+                    <div onClick={audioHandler}>
                         <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="size-6">
                         <path strokeLinecap="round" strokeLinejoin="round" d="M12 18.75a6 6 0 0 0 6-6v-1.5m-6 7.5a6 6 0 0 1-6-6v-1.5m6 7.5v3.75m-3.75 0h7.5M12 15.75a3 3 0 0 1-3-3V4.5a3 3 0 1 1 6 0v8.25a3 3 0 0 1-3 3Z" />
                         </svg> <div></div>
                     </div>
-                    <div >
+                    <div onClick={videoHandler}>
                         <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="size-6">
                         <path strokeLinecap="round" strokeLinejoin="round" d="m15.75 10.5 4.72-4.72a.75.75 0 0 1 1.28.53v11.38a.75.75 0 0 1-1.28.53l-4.72-4.72M4.5 18.75h9a2.25 2.25 0 0 0 2.25-2.25v-9a2.25 2.25 0 0 0-2.25-2.25h-9A2.25 2.25 0 0 0 2.25 7.5v9a2.25 2.25 0 0 0 2.25 2.25Z" />
                         </svg><div></div>

@@ -50,7 +50,7 @@ export const SignupPage = ()=>{
         });
         const token = await response.data;
 
-        localStorage.setItem("token",token);
+        localStorage.setItem("token",token.token);
         alert("Signup successful")
         console.log(token);
     }
