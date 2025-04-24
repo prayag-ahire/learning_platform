@@ -12,22 +12,32 @@ let stream:MediaStream | undefined;
 let videoElemnt:HTMLVideoElement
 let videoTrack:MediaStreamTrack | undefined;
 let audioTrack:MediaStreamTrack | undefined;
+let roomId:string;
 
 interface chat {
-  user:string;
+  type:string;
   message:string;
   timestamp:string;
+  roomId:string;
 }
 
-export let livechat:chat[] = [];
+
 
 const LiveClass = ()=>{
 
   const [localMedia,setLocalMedia] = useState(false);
+  const [value,setValue] = useState("");
+  const [livechat,setLiveChat] = useState<chat[]>([]);
   const socket = useSocket();
 
   const Navigate = useNavigate();
-  let roomId:string
+  const date = new Date().toLocaleTimeString([],{
+    hour: '2-digit',
+    minute: '2-digit',
+    hour12: true,
+  });
+
+  
 
     const endhandler = ()=>{
       stopOldTrack();
@@ -55,9 +65,7 @@ const LiveClass = ()=>{
       videoElemnt.play();
 
     }
-    const chatHandler = ()=>{
-      
-    }
+   
 
     const stopOldTrack = ()=>{
       stream?.getTracks().forEach(track=>track.stop());
@@ -127,12 +135,18 @@ const LiveClass = ()=>{
               console.log(event.data);
               break;
 
-            case 'chat':
-
-
             case "livechat":
-              livechat = event.data;
-              console.log("this is live chat",livechat);
+
+              // const temp = JSON.parse(event.data);
+              // console.log();
+              // const room = temp.data.room;
+
+               if(res.data.room === roomId){
+                //  console.log("this is one room message",temp);
+                 setLiveChat(res.data.msg);
+                //  console.log("this is live chat",livechat);
+                //  console.log(livechat);
+               }
               break;
             default:
               break;
@@ -175,8 +189,8 @@ const LiveClass = ()=>{
 
 
     const onRouterRtpCapabilities = async (res:any) => {
-      console.log("socket id:", res.id);
-      console.log(res.data)
+      // console.log("socket id:", res.id);
+      // console.log(res.data)
       try {
         await loadDevice(res.data);
         console.log("Device loaded successfully");
@@ -229,7 +243,7 @@ const LiveClass = ()=>{
           
           socket?.addEventListener('message',(event)=>{
             let res = JSON.parse(event.data);
-            console.log(res);
+            // console.log(res);
             if(res.type === "producerConnected"){
               console.log("got connected");
               callback();
@@ -325,24 +339,35 @@ const LiveClass = ()=>{
         const handler = (e:any)=>{  
             e.preventDefault();
 
-            const msg = e.target[0].value;
-            e.target.reset();
+            
+            console.log(value);
+          
+            const message = {
+              type:"chat",
+              data:{
+                message:value,
+                timestamp:date,
+                roomId
+              }
+            }
+            setValue("");
+            // console.log("message",message);
+            socket?.send(JSON.stringify(message));
         }
 
           
       return(<div className="group">
         <div className="flex flex-row w-full h-full ">
             <video hidden className=" w-5xl  " id="local_stream" controls autoPlay></video>
-            <form onClick={handler}>
             <div className="grid w-2xl h-[calc(96.7vh-64px)] grid-rows-[90%_10%] border bg-zinc-700  overflow-hidden">
                         {/* Chat Messages */}
                         <div className="overflow-y-auto h-full p-4 ">
-                          {/* map your messages here */}
-                          {livechat.map((x)=>{
-                                      return <div className="bg-gray-400 w-20 rounded-sm pl-2 m-2">
-                                                  <p className="font-semibold text-lg">{x.message}</p>
+                        
+                          {livechat.map((x,i)=>{
+                                      return (<div key={i} className="bg-gray-400 w-fit max-w-xs rounded-sm p-2 m-2">
+                                                  <p className="font-semibold text-lg text-white w-fit max-w-xs break-words">{x.message}</p>
                                                   <p className="text-xs">{x.timestamp}</p>
-                                              </div>
+                                              </div>)
                                     })}
                         </div>
 
@@ -350,15 +375,16 @@ const LiveClass = ()=>{
                         <div className=" p-3  flex items-center">
                           <input
                             type="text"
+                            onChange={(e)=>{setValue(e.target.value);}}
                             placeholder="Type your message..."
                             className="bg-white flex-1 border border-gray-300 rounded-lg px-3 py-2 focus:outline-none"
                           />
-                          <button className="ml-2 px-4 py-2 bg-blue-500 text-white rounded-lg" type="submit">
+                          <button className="ml-2 px-4 py-2 bg-blue-500 text-white rounded-lg" type="button" onClick={handler}>
                             Send
                           </button>
                         </div>
                   </div>
-            </form>
+            
             
         </div>
         {/* <div><p id='text_p'></p></div> */}

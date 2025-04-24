@@ -9,9 +9,10 @@ import  jwt, { JwtPayload }  from "jsonwebtoken";
 import { PrismaClient } from "@prisma/client";
 
 let roomManger:RoomManager;
-let chatManager:ChatManager = ChatManager.getInstance();
+// let chatManager:ChatManager = ChatManager.getInstance();
 let genrateRoomId = 1;
 let id:number;
+let roomId:number;
 
 export const webSocketConnection = async (websocket:WebSocketServer)=>{
     try{
@@ -33,13 +34,18 @@ export const webSocketConnection = async (websocket:WebSocketServer)=>{
             switch(event.type){
 
                 case "chat":
-                    chatManager.addMessage(event.data);
-                    brodcast(websocket,"livechat",chatManager.getMessages());
-                    console.log("this is chat message",event.data);
+                    roomManger.addChat(event.data);
+                    console.log("message recive",event.data);
+
+                    const msg = {
+                        room:event.data.roomId,
+                        msg:roomManger.getChat(event.data.roomId+"")
+                    }
+                    brodcast(websocket,"livechat",msg);                    
                     break;
 
                 case "create-room":
-                    const roomId = genrateRoomId++;
+                    roomId = genrateRoomId++;
                     onCreateRoom(event,roomId.toString(),ws);
                     break;
 
@@ -189,7 +195,7 @@ export const webSocketConnection = async (websocket:WebSocketServer)=>{
 
     const onResume = async(event:any,ws:WebSocket)=>{
         const consumer =  roomManger.getConsumer(event.id,event.roomId);
-        await consumer?.map(x=>x.resume());
+         consumer?.map(x=>x.resume());
         send(ws,"resumed","resumed"); 
     }
 
@@ -219,6 +225,7 @@ export const webSocketConnection = async (websocket:WebSocketServer)=>{
             type,
             data:msg
         }
+        console.log("message sending",message);
         const res= JSON.stringify(message);
         ws.clients.forEach((client)=>{
             client.send(res);

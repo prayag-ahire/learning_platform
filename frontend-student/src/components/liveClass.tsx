@@ -1,10 +1,14 @@
 import * as mediasoup from "mediasoup-client"
 import { Consumer } from "mediasoup-client/types";
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 import { useNavigate, useSearchParams } from "react-router-dom";
 import {v4} from "uuid";
 
-
+interface chat {
+  type:string;
+  message:string;
+  timestamp:string;
+}
 
 let device: mediasoup.types.Device;
 let socket: WebSocket;
@@ -16,6 +20,14 @@ const LiveClass = (roomId:string)=>{
 
   const Navigate = useNavigate();
   const [searchParams] = useSearchParams();
+  const [value,setValue] = useState("");
+  const [livechat,setLiveChat] = useState<chat[]>([]);
+  const date = new Date().toLocaleTimeString([],{
+    hour: '2-digit',
+    minute: '2-digit',
+    hour12: true,
+  });
+  
   roomId = searchParams.get("room") || " ";
   const id = v4();
   useEffect(()=>{
@@ -56,6 +68,13 @@ const LiveClass = (roomId:string)=>{
               
             case 'closed':
                 onBroadcasterclosed(res.data);
+              break;
+
+            case "livechat":
+              const temp = JSON.parse(event.data);
+              setLiveChat(temp.data);
+              console.log("this is live chat",livechat);
+              console.log(livechat);
               break;
 
             default:
@@ -217,10 +236,49 @@ const LiveClass = (roomId:string)=>{
       })
   }
 
+  const handler = (e:any)=>{  
+    e.preventDefault();
+
+    
+    console.log(value);
+    const message = {
+      type:"chat",
+      message:value,
+      timestamp:date,
+      roomId,
+    }
+    setValue("");
+    socket?.send(JSON.stringify(message));
+}
+
       return(<div>
         <div className="w-full flex flex-row ">
             <video  className="w-5xl" id="remote_stream" autoPlay></video>
-            <div hidden className="border-2 w-2xl border-amber-950" id="chat"></div>
+            <div className="grid w-2xl h-[calc(96.7vh-64px)] grid-rows-[90%_10%] border bg-zinc-700  overflow-hidden">
+                        {/* Chat Messages */}
+                        <div className="overflow-y-auto h-full p-4 ">
+                        
+                          {livechat.map((x,i)=>{
+                                      return (<div key={i} className="bg-gray-400 w-fit max-w-xs rounded-sm p-2 m-2">
+                                                  <p className="font-semibold text-lg text-white w-fit max-w-xs break-words">{x.message}</p>
+                                                  <p className="text-xs">{x.timestamp}</p>
+                                              </div>)
+                                    })}
+                        </div>
+
+                        {/* Input Box */}
+                        <div className=" p-3  flex items-center">
+                          <input
+                            type="text"
+                            onChange={(e)=>{setValue(e.target.value);}}
+                            placeholder="Type your message..."
+                            className="bg-white flex-1 border border-gray-300 rounded-lg px-3 py-2 focus:outline-none"
+                          />
+                          <button className="ml-2 px-4 py-2 bg-blue-500 text-white rounded-lg" type="button" onClick={handler}>
+                            Send
+                          </button>
+                        </div>
+                  </div>
         </div>
       </div>)
     
