@@ -6,6 +6,7 @@ import * as z from "zod"
 import { useForm } from "react-hook-form";
 import axios from "axios";
 import { Input } from "./ui/input";
+import { useNavigate } from "react-router-dom";
 // import Cookies from "js-cookie";
 
 
@@ -18,6 +19,8 @@ type loginFormValues = z.infer<typeof loginFormSchema>
 
 
 export const LoginPage = ()=>{
+
+    const navigate = useNavigate();
 
      const form = useForm<loginFormValues>({
             resolver:zodResolver(loginFormSchema),
@@ -40,6 +43,7 @@ export const LoginPage = ()=>{
         localStorage.setItem("token",token.token);
         // Cookies.set("token",token.toekn,{expires:1,secure:false});
         alert("yay, login sucseccful!");
+        navigate("/");  
     }
 
     return(<div>

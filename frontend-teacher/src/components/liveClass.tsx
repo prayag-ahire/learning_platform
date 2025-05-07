@@ -136,16 +136,8 @@ const LiveClass = ()=>{
               break;
 
             case "livechat":
-
-              // const temp = JSON.parse(event.data);
-              // console.log();
-              // const room = temp.data.room;
-
                if(res.data.room === roomId){
-                //  console.log("this is one room message",temp);
                  setLiveChat(res.data.msg);
-                //  console.log("this is live chat",livechat);
-                //  console.log(livechat);
                }
               break;
             default:

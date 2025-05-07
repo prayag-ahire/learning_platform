@@ -4,6 +4,11 @@ export const LiveClass2 = ()=>{
     const Navigate = useNavigate(); 
 
     const handler = ()=>{
+        const token = localStorage.getItem("token");
+        if(!token){
+          Navigate("/login");
+          return
+        }
         Navigate("/startlive");
     }
     return(<div className="flex flex-1 ">

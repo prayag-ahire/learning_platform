@@ -18,7 +18,7 @@ router.post('/login',async (req:Request,res:Response):Promise<any>=>{
         })
         console.log(user);
         if(!user){
-            return res.status(400).json({message:"Invalid credintials"});
+            return res.status(400).json({message:"Invalid credintials ! user not exitst"});
         }
         const match = await bcrypt.compare(password,user.password);
 
@@ -26,7 +26,6 @@ router.post('/login',async (req:Request,res:Response):Promise<any>=>{
         if(!match){
             return res.status(400).json({message:"Invalid credintials"});
         }
-
         const token = jwt.sign({id:user.id},"this",{expiresIn:'7d'});
 
         res.json({token:token});

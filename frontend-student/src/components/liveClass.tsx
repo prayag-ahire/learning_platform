@@ -16,7 +16,7 @@ let remote_video: HTMLVideoElement | null;
 let transport: mediasoup.types.Transport;
 let remoteStream: MediaStream;
 
-const LiveClass = (roomId:string)=>{
+const LiveClass = (roomId:any)=>{
 
   const Navigate = useNavigate();
   const [searchParams] = useSearchParams();
@@ -71,10 +71,9 @@ const LiveClass = (roomId:string)=>{
               break;
 
             case "livechat":
-              const temp = JSON.parse(event.data);
-              setLiveChat(temp.data);
-              console.log("this is live chat",livechat);
-              console.log(livechat);
+              if(res.data.room === roomId){
+                setLiveChat(res.data.msg);
+              }
               break;
 
             default:
@@ -238,16 +237,17 @@ const LiveClass = (roomId:string)=>{
 
   const handler = (e:any)=>{  
     e.preventDefault();
-
-    
-    console.log(value);
-    const message = {
-      type:"chat",
-      message:value,
-      timestamp:date,
-      roomId,
-    }
-    setValue("");
+            console.log(value);
+          
+            const message = {
+              type:"chat",
+              data:{
+                message:value,
+                timestamp:date,
+                roomId
+              }
+            }
+            setValue("");
     socket?.send(JSON.stringify(message));
 }
 

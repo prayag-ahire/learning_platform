@@ -40,7 +40,6 @@ model StudentTeacher {
 }
 
 
-
 model matrial_schema{
   id Int @id @default(autoincrement())
   title String

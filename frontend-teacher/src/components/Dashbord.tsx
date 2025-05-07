@@ -1,5 +1,6 @@
 import axios from "axios";
 import { useEffect, useState } from "react"
+import { useNavigate } from "react-router-dom";
 
 
 export const DashBoard = ()=>{
@@ -8,6 +9,8 @@ export const DashBoard = ()=>{
     const date =  new Date();
     const [datetime , setDateTime] = useState("");
     const [name,setName] = useState("");
+    const Navigate = useNavigate(); 
+
 
     const handler = async(tk:string)=>{
         const res = await axios.post("http://localhost:3000/api/v1/teacher/me",{
@@ -18,6 +21,10 @@ export const DashBoard = ()=>{
 
     useEffect(()=>{
         const tk:string = localStorage.getItem("token")+"";
+        if(!tk){
+            Navigate("/login");
+            return
+          }
         handler(tk);
         setDateTime(date.toLocaleString('en-in',{weekday:'long',hour:'2-digit',minute:"2-digit",hour12:true}));
         setInterval(()=>{

@@ -10,6 +10,10 @@ export const LiveClass2 = ()=>{
 
     const getliveclass = async ()=>{
         const token = localStorage.getItem("token");
+        if(!token){
+          Navigate("/login")
+          return;
+        }
         const res = await axios.post("http://localhost:3000/api/v1/student/live",{
           token
         });

@@ -7,7 +7,7 @@ import { useForm } from "react-hook-form";
 import axios from "axios";
 import { Input } from "./ui/input";
 import {ToastContainer ,toast} from "react-toastify"
-import { Link } from "react-router-dom";
+import { Link,  useNavigate } from "react-router-dom";
 import { useEffect } from "react";
 
 
@@ -20,6 +20,8 @@ type loginFormValues = z.infer<typeof loginFormSchema>
 
 
 export const LoginPage = ()=>{
+
+    const navigate = useNavigate();
 
     useEffect(()=>{
         console.log(localStorage.getItem("token"));
@@ -45,6 +47,7 @@ export const LoginPage = ()=>{
         console.log(token.token);
         localStorage.setItem("token",token.token);
         toast("yay, login sucseccful!")
+        navigate("/")
     }
 
     return(<div>

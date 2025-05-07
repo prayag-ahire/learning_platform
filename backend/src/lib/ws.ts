@@ -3,7 +3,7 @@ import createWebRtcTransport from "./createWebRtcTransport.js";
 import {v4} from "uuid";
 import { WebSocket, WebSocketServer } from "ws";
 import {RoomManager} from "../managers/roomManager.js"
-import { ChatManager } from "../managers/chatManager.js";
+// import { ChatManager } from "../managers/chatManager.js";
 // import prisma from "../prismaClient.js";
 import  jwt, { JwtPayload }  from "jsonwebtoken";
 import { PrismaClient } from "@prisma/client";
